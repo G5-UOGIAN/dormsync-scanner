@@ -11,6 +11,7 @@ import LogsTable from './components/LogsTable';
 import LogsGrid from './components/LogsGrid';
 import ImageModal from './components/ImageModal';
 import DateRangeModal from './components/DateRangeModal';
+import InstallPWA from './components/InstallPWA';
 import Students from './pages/Students';
 import Reports from './pages/Reports';
 import Notifications from './pages/Notifications';
@@ -355,6 +356,9 @@ const App = () => {
             onMobileClose={() => setMobileMenuOpen(false)}
           />
         )}
+
+        {/* PWA Install Prompt */}
+        <InstallPWA />
       </div>
     );
   }
@@ -662,6 +666,9 @@ const App = () => {
           onMobileClose={() => setMobileMenuOpen(false)}
         />
       )}
+
+      {/* PWA Install Prompt */}
+      <InstallPWA />
     </div>
   );
 };
