@@ -9,7 +9,10 @@ import StatsCard from './components/StatsCard';
 import LogsTable from './components/LogsTable';
 import LoadingSpinner from './components/LoadingSpinner';
 import ImageModal from './components/ImageModal';
-import ComingSoon from './components/ComingSoon';
+import Students from './pages/Students';
+import Reports from './pages/Reports';
+import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
 import { toast } from './components/ui/toast';
 
@@ -33,9 +36,14 @@ const App = () => {
   const loadData = async () => {
     try {
       setLoading(true);
+      
+      // Get paths from localStorage or use defaults
+      const scanLogsPath = localStorage.getItem('scanLogsPath') || '/scan_logs.csv';
+      const allotmentsPath = localStorage.getItem('allotmentsPath') || '/allotments.csv';
+      
       const [logsRes, allotRes] = await Promise.all([
-        fetch('/scan_logs.csv'),
-        fetch('/allotments.csv')
+        fetch(scanLogsPath),
+        fetch(allotmentsPath)
       ]);
 
       const logsText = await logsRes.text();
@@ -227,20 +235,6 @@ const App = () => {
   };
 
   if (activeTab !== 'dashboard') {
-    const titles = {
-      students: 'Student Management',
-      reports: 'Reports & Analytics',
-      notifications: 'Notifications Center',
-      settings: 'System Settings'
-    };
-    
-    const descriptions = {
-      students: 'Manage student profiles, allotments, and hostel assignments.',
-      reports: 'Generate detailed reports and view analytics dashboards.',
-      notifications: 'Configure alerts and view system notifications.',
-      settings: 'Customize system preferences and manage configurations.'
-    };
-
     return (
       <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
         <Sidebar 
@@ -249,11 +243,11 @@ const App = () => {
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
         />
-        <div className="flex-1">
-          <ComingSoon 
-            title={titles[activeTab]} 
-            description={descriptions[activeTab]}
-          />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {activeTab === 'students' && <Students allotments={allotments} />}
+          {activeTab === 'reports' && <Reports logs={logs} />}
+          {activeTab === 'notifications' && <Notifications />}
+          {activeTab === 'settings' && <Settings />}
         </div>
       </div>
     );
@@ -333,15 +327,7 @@ const App = () => {
                     onClick={() => handleTabChange('all')}
                     disabled={processing}
                   >
-                    {processing && filterTab === 'all' ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        All Scans
-                      </span>
-                    ) : 'All Scans'}
+                    All Scans
                   </TabsTrigger>
                   <TabsTrigger 
                     value="boarder" 
@@ -349,15 +335,7 @@ const App = () => {
                     onClick={() => handleTabChange('boarder')}
                     disabled={processing}
                   >
-                    {processing && filterTab === 'boarder' ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Boarders
-                      </span>
-                    ) : 'Boarders'}
+                    Boarders
                   </TabsTrigger>
                   <TabsTrigger 
                     value="non-boarder" 
@@ -365,15 +343,7 @@ const App = () => {
                     onClick={() => handleTabChange('non-boarder')}
                     disabled={processing}
                   >
-                    {processing && filterTab === 'non-boarder' ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Non-Boarders
-                      </span>
-                    ) : 'Non-Boarders'}
+                    Non-Boarders
                   </TabsTrigger>
                   <TabsTrigger 
                     value="late" 
@@ -381,15 +351,7 @@ const App = () => {
                     onClick={() => handleTabChange('late')}
                     disabled={processing}
                   >
-                    {processing && filterTab === 'late' ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Late Entries
-                      </span>
-                    ) : 'Late Entries'}
+                    Late Entries
                   </TabsTrigger>
                   <TabsTrigger 
                     value="invalid" 
@@ -397,15 +359,7 @@ const App = () => {
                     onClick={() => handleTabChange('invalid')}
                     disabled={processing}
                   >
-                    {processing && filterTab === 'invalid' ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Invalid
-                      </span>
-                    ) : 'Invalid'}
+                    Invalid
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
