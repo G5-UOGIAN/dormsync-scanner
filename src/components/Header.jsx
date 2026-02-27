@@ -1,7 +1,6 @@
 import { Search, Calendar, X } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import moment from 'moment';
 
 const Header = ({ searchTerm, setSearchTerm, onSearch, selectedDate, setSelectedDate }) => {
   const handleKeyPress = (e) => {

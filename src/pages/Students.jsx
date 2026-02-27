@@ -1,34 +1,69 @@
 import { useState, useMemo } from 'react';
-import { Search, MapPin, Phone, User, Home } from 'lucide-react';
+import { Search, MapPin, Phone, User, Home, Filter } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent } from '../components/ui/card';
+import { Select, SelectItem } from '../components/ui/select';
 
 const Students = ({ allotments }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedHostel, setSelectedHostel] = useState('');
+  const [selectedRoom, setSelectedRoom] = useState('');
 
   const allotmentsList = useMemo(() => {
     return Object.values(allotments);
   }, [allotments]);
 
+  // Get unique hostels
+  const hostels = useMemo(() => {
+    const uniqueHostels = [...new Set(allotmentsList.map(s => s.Hostel).filter(Boolean))];
+    return uniqueHostels.sort();
+  }, [allotmentsList]);
+
+  // Get rooms for selected hostel
+  const rooms = useMemo(() => {
+    if (!selectedHostel) return [];
+    const hostelRooms = allotmentsList
+      .filter(s => s.Hostel === selectedHostel)
+      .map(s => s.Room)
+      .filter(Boolean);
+    return [...new Set(hostelRooms)].sort();
+  }, [allotmentsList, selectedHostel]);
+
   const filteredStudents = useMemo(() => {
-    if (!searchTerm) return allotmentsList;
-    
-    return allotmentsList.filter(student => {
-      const name = student.Name?.toLowerCase() || '';
-      const rollNo = student['Roll No.']?.toLowerCase() || '';
-      const hostel = student.Hostel?.toLowerCase() || '';
-      const room = student.Room?.toLowerCase() || '';
-      
-      return (
-        name.includes(searchTerm.toLowerCase()) ||
-        rollNo.includes(searchTerm.toLowerCase()) ||
-        hostel.includes(searchTerm.toLowerCase()) ||
-        room.includes(searchTerm.toLowerCase())
-      );
-    });
-  }, [allotmentsList, searchTerm]);
+    let filtered = allotmentsList;
+
+    // Filter by hostel
+    if (selectedHostel) {
+      filtered = filtered.filter(s => s.Hostel === selectedHostel);
+    }
+
+    // Filter by room
+    if (selectedRoom) {
+      filtered = filtered.filter(s => s.Room === selectedRoom);
+    }
+
+    // Filter by search term (name or roll number)
+    if (searchTerm) {
+      filtered = filtered.filter(student => {
+        const name = student.Name?.toLowerCase() || '';
+        const rollNo = student['Roll No.']?.toLowerCase() || '';
+        return (
+          name.includes(searchTerm.toLowerCase()) ||
+          rollNo.includes(searchTerm.toLowerCase())
+        );
+      });
+    }
+
+    return filtered;
+  }, [allotmentsList, searchTerm, selectedHostel, selectedRoom]);
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedHostel('');
+    setSelectedRoom('');
+  };
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden p-6 space-y-6">
@@ -37,22 +72,88 @@ const Students = ({ allotments }) => {
         <p className="text-sm text-slate-500 mt-1">View and manage student hostel allotments</p>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 max-w-md relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <Input
-            type="text"
-            placeholder="Search by name, roll no, hostel, or room..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Button variant="outline">
-          Total Students: {filteredStudents.length}
-        </Button>
-      </div>
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            {/* Hostel Select */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Hostel
+              </label>
+              <Select
+                value={selectedHostel}
+                onValueChange={(value) => {
+                  setSelectedHostel(value);
+                  setSelectedRoom(''); // Reset room when hostel changes
+                }}
+                placeholder="All Hostels"
+              >
+                {hostels.map(hostel => (
+                  <SelectItem key={hostel} value={hostel}>
+                    {hostel}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+
+            {/* Room Select */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Room
+              </label>
+              <Select
+                value={selectedRoom}
+                onValueChange={setSelectedRoom}
+                placeholder="All Rooms"
+                disabled={!selectedHostel}
+              >
+                {rooms.map(room => (
+                  <SelectItem key={room} value={room}>
+                    {room}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+
+            {/* Search by Name/Roll No */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Search
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input
+                  type="text"
+                  placeholder="Name or Roll No..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Actions
+              </label>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handleClearFilters}
+                  className="flex-1"
+                >
+                  Clear
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  {filteredStudents.length} Found
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Students Grid */}
       <div className="flex-1 overflow-auto">
@@ -114,7 +215,7 @@ const Students = ({ allotments }) => {
                 No Students Found
               </p>
               <p className="text-sm text-slate-500">
-                Try adjusting your search criteria
+                Try adjusting your filters
               </p>
             </div>
           </div>

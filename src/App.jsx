@@ -1,20 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
 import Papa from 'papaparse';
 import moment from 'moment';
-import { Clock, Users, ShieldAlert, AlertTriangle } from 'lucide-react';
+import { Clock, Users, ShieldAlert, AlertTriangle, Search, Calendar, X } from 'lucide-react';
 
 import Sidebar from './components/Sidebar';
-import Header from './components/Header';
 import StatsCard from './components/StatsCard';
 import LogsTable from './components/LogsTable';
-import LoadingSpinner from './components/LoadingSpinner';
 import ImageModal from './components/ImageModal';
 import Students from './pages/Students';
 import Reports from './pages/Reports';
 import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from './components/ui/tabs';
 import { toast } from './components/ui/toast';
+import { Input } from './components/ui/input';
+import { Button } from './components/ui/button';
 
 const App = () => {
   const [logs, setLogs] = useState([]);
@@ -215,6 +215,12 @@ const App = () => {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   const handleSort = (key) => {
     setProcessing(true);
     setTimeout(() => {
@@ -263,13 +269,11 @@ const App = () => {
       />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onSearch={handleSearch}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-        />
+        {/* Page Title Header */}
+        <div className="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 px-6 py-4">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">Monitor and manage hostel scan entries</p>
+        </div>
 
         <div className="flex-1 overflow-hidden p-6 space-y-6">
           {/* Static Stats Cards */}
@@ -296,6 +300,46 @@ const App = () => {
               value={stats.invalid}
               icon={ShieldAlert}
             />
+          </div>
+
+          {/* Search and Date Filter */}
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-3 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 max-w-md relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Input
+                  type="text"
+                  placeholder="Search by name or roll number..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="pl-10"
+                />
+              </div>
+              <Button onClick={handleSearch}>
+                Search
+              </Button>
+
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" size={18} />
+                  <Input
+                    type="date"
+                    value={selectedDate || ''}
+                    onChange={(e) => setSelectedDate(e.target.value || null)}
+                    className="pl-10 pr-10 w-48"
+                  />
+                  {selectedDate && (
+                    <button
+                      onClick={() => setSelectedDate(null)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Tabs and Table Container */}
