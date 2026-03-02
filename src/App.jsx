@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import Papa from 'papaparse';
 import moment from 'moment';
-import { Clock, Users, ShieldAlert, AlertTriangle, Search, Calendar, LayoutGrid, List, Filter, Activity } from 'lucide-react';
+import { Users, ShieldAlert, AlertTriangle, Search, Calendar, LayoutGrid, List, Filter, Activity } from 'lucide-react';
 import { cn } from './lib/utils';
+import { isSessionValid, clearSession } from './utils/auth';
 
 import Sidebar from './components/Sidebar';
 import PageHeader from './components/PageHeader';
@@ -11,7 +12,6 @@ import LogsTable from './components/LogsTable';
 import LogsGrid from './components/LogsGrid';
 import ImageModal from './components/ImageModal';
 import DateRangeModal from './components/DateRangeModal';
-import InstallPWA from './components/InstallPWA';
 import Login from './pages/Login';
 import Students from './pages/Students';
 import Reports from './pages/Reports';
@@ -24,12 +24,12 @@ import { Button } from './components/ui/button';
 
 const App = () => {
   // Authentication
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   
   // Data
   const [logs, setLogs] = useState([]);
   const [allotments, setAllotments] = useState({});
-  const [lastSync, setLastSync] = useState(null);
+  const [lastScan, setLastScan] = useState(null);
   
   // UI State
   const [loading, setLoading] = useState(true);
@@ -47,11 +47,26 @@ const App = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [showUnique, setShowUnique] = useState(false);
 
-  // Check authentication on mount
+  // Check authentication on mount and set up session checking
   useEffect(() => {
-    const auth = localStorage.getItem('dormsyncscanner_auth');
-    setIsAuthenticated(auth === 'true');
-  }, []);
+    const checkAuth = () => {
+      if (isSessionValid()) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        if (activeTab !== 'dashboard') {
+          setActiveTab('dashboard');
+        }
+      }
+    };
+
+    checkAuth();
+
+    // Check session every minute
+    const interval = setInterval(checkAuth, 60000);
+
+    return () => clearInterval(interval);
+  }, [activeTab]);
 
   // Detect mobile screen
   useEffect(() => {
@@ -78,11 +93,11 @@ const App = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+      // https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_logs.csv
       // Get URLs from env or localStorage
       const scanLogsUrl = import.meta.env.VITE_SCAN_LOGS_URL || 
                          localStorage.getItem('scanLogsPath') || 
-                         'https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_logs.csv';
+                         '/scan_logs.csv';
       
       const allotmentsUrl = scanLogsUrl.replace('scan_logs.csv', 'allotments.csv');
       
@@ -124,15 +139,12 @@ const App = () => {
         header: true,
         skipEmptyLines: true,
         complete: (result) => {
-          let lastUpdateDate = null;
-          
-          // Process logs and extract last update date
+          // Process logs
           const processedLogs = result.data
             .filter(row => {
-              // Check if this is the last update marker
+              // Skip the last update marker row
               if (row.Name?.trim() === 'LAST UPDAED LOGS' || row.Name?.trim() === 'LAST UPDATED LOGS') {
-                lastUpdateDate = `${row.Date_?.trim()} ${row.Time?.trim()}`;
-                return false; // Don't include this row in logs
+                return false;
               }
               return row.Date_ && row.QR_Code && row.QR_Code !== 'NULL';
             })
@@ -149,11 +161,15 @@ const App = () => {
 
           setLogs(processedLogs);
           
-          // Set last sync from CSV or current time
-          if (lastUpdateDate) {
-            setLastSync(moment(lastUpdateDate, 'DD/MM/YYYY HH:mm:ss').toDate());
-          } else {
-            setLastSync(new Date());
+          // Set last scan to the most recent entry
+          if (processedLogs.length > 0) {
+            // Find the most recent scan by parsing all dates
+            const sortedByDate = [...processedLogs].sort((a, b) => {
+              const dateA = moment(a.DateTime, 'DD/MM/YYYY HH:mm:ss');
+              const dateB = moment(b.DateTime, 'DD/MM/YYYY HH:mm:ss');
+              return dateB.valueOf() - dateA.valueOf();
+            });
+            setLastScan(moment(sortedByDate[0].DateTime, 'DD/MM/YYYY HH:mm:ss').toDate());
           }
           
           setLoading(false);
@@ -343,9 +359,10 @@ const App = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('dormsyncscanner_auth');
+    clearSession();
     setIsAuthenticated(false);
     setActiveTab('dashboard');
+    toast.success('Logged out successfully');
   };
 
   const handleTabChange = (tab) => {
@@ -442,8 +459,6 @@ const App = () => {
             onLogout={handleLogout}
           />
         )}
-
-        <InstallPWA />
       </div>
     );
   }
@@ -547,18 +562,15 @@ const App = () => {
             </div>
           )}
 
-          {/* Last Sync Info */}
-          {lastSync && (
-            <div className="flex items-center justify-between bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800 rounded-lg px-4 py-2">
+          {/* Last Scan Info */}
+          {lastScan && (
+            <div className="flex items-center justify-center bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800 rounded-lg px-4 py-2">
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-cyan-600" />
                 <span className="text-sm text-cyan-900 dark:text-cyan-100">
-                  Last synced: {moment(lastSync).format('MMM DD, YYYY [at] hh:mm A')}
+                  Last scan: {moment(lastScan).format('MMM DD, YYYY [at] hh:mm A')}
                 </span>
               </div>
-              <Button variant="ghost" size="sm" onClick={loadData} disabled={loading}>
-                Refresh
-              </Button>
             </div>
           )}
 
@@ -765,8 +777,6 @@ const App = () => {
             onLogout={handleLogout}
           />
         )}
-
-        <InstallPWA />
       </div>
     </div>
   );

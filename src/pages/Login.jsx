@@ -2,31 +2,28 @@ import { useState } from 'react';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
-import { Lock, User } from 'lucide-react';
-import { toast } from '../components/ui/toast';
+import { Lock, User, AlertCircle } from 'lucide-react';
+import { validateCredentials, createSession } from '../utils/auth';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
 
-    // Get credentials from environment variables
-    const validUsername = import.meta.env.VITE_ADMIN_USERNAME || 'deputy.warden';
-    const validPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'wardenofficeclosed';
-
     setTimeout(() => {
-      if (username === validUsername && password === validPassword) {
-        localStorage.setItem('dormsyncscanner_auth', 'true');
-        toast.success('Login successful!');
+      if (validateCredentials(username, password)) {
+        createSession();
         onLogin();
       } else {
-        toast.error('Invalid username or password');
+        setError('Invalid username or password');
+        setLoading(false);
       }
-      setLoading(false);
     }, 500);
   };
 
@@ -42,6 +39,13 @@ const Login = ({ onLogin }) => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg">
+                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
+            )}
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Username
@@ -55,6 +59,7 @@ const Login = ({ onLogin }) => {
                   onChange={(e) => setUsername(e.target.value)}
                   className="pl-10"
                   required
+                  autoFocus
                 />
               </div>
             </div>
@@ -78,6 +83,12 @@ const Login = ({ onLogin }) => {
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
+
+          <div className="mt-6 p-4 bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-900 rounded-lg">
+            <p className="text-xs text-cyan-800 dark:text-cyan-200 text-center">
+              Session expires after 30 minutes of inactivity
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

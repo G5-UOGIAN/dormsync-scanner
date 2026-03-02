@@ -4,6 +4,13 @@ A professional Single Page Application (SPA) dashboard for hostel wardens, part 
 
 ## Features
 
+### Authentication System
+- **Secure Login**: Username and password authentication via environment variables
+- **Session Management**: 30-minute session timeout with automatic logout
+- **Session Validation**: Checks session validity every minute
+- **No Token Manipulation**: Cannot bypass authentication by modifying localStorage
+- **Environment-Based**: Credentials stored securely in `.env` file
+
 ### Dashboard (Main Page)
 - **Scan Logs Display**: View all student entry/exit records with filtering
 - **Date Filtering**: Shows all records by default, with date selector to filter by specific date
@@ -106,10 +113,78 @@ src/
 
 ```bash
 npm install
+```
+
+## Configuration
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+# Authentication Credentials
+VITE_ADMIN_USERNAME=your_username
+VITE_ADMIN_PASSWORD=your_password
+
+# Session Timeout (in minutes)
+VITE_SESSION_TIMEOUT=30
+```
+
+**Security Notes:**
+- Never commit the `.env` file to version control
+- Change default credentials before deployment
+- Session expires after 30 minutes of inactivity
+- Users must re-authenticate after session expiry
+
+## Development
+
+```bash
 npm run dev
 ```
 
+This will start the development server at `http://localhost:5173`
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+This creates an optimized production build in the `dist/` folder.
+
+## Serving the Built Application
+
+After building, you need to serve the application through a web server (not by opening `index.html` directly due to CORS restrictions).
+
+### Option 1: Using Python (Recommended for Testing)
+```bash
+# Python 3
+cd dist
+python -m http.server 8000
+
+# Then open http://localhost:8000 in your browser
+```
+
+### Option 2: Using Node.js serve package
+```bash
+# Install serve globally
+npm install -g serve
+
+# Serve the dist folder
+serve -s dist
+
+# Then open the URL shown in terminal
+```
+
+### Option 3: Using any web server
+Deploy the `dist/` folder to any web server (Apache, Nginx, etc.)
+
+**Important**: Do NOT open `dist/index.html` directly in the browser as it will cause CORS errors. Always use a web server.
+
 ## Usage
+
+### Authentication
+1. **Login**: Enter username and password from `.env` file
+2. **Session**: Automatically logged out after 30 minutes of inactivity
+3. **Logout**: Click logout button in sidebar to end session manually
 
 ### Dashboard
 1. **Shows all records by default** (no date filter on initial load)

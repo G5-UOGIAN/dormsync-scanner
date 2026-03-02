@@ -15,12 +15,16 @@ const Settings = ({ isMobile }) => {
 
   useEffect(() => {
     // Load saved paths from localStorage
+    // const savedScanLogsPath = localStorage.getItem('scanLogsPath') || '/scan_logs.csv';
+    // const savedAllotmentsPath = localStorage.getItem('allotmentsPath') || '/allotments.csv';
+
     const savedScanLogsPath = localStorage.getItem('scanLogsPath') || 'https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_logs.csv';
     const savedAllotmentsPath = localStorage.getItem('allotmentsPath') || 'https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/allotments.csv';
+
     const savedLateEntryHour = localStorage.getItem('lateEntryHour') || '22';
     const savedProfileImagesPath = localStorage.getItem('profileImagesPath') || '/images/students/';
     const savedScanImagesPath = localStorage.getItem('scanImagesPath') || '/captured/';
-    
+
     setScanLogsPath(savedScanLogsPath);
     setAllotmentsPath(savedAllotmentsPath);
     setLateEntryHour(savedLateEntryHour);
@@ -35,7 +39,7 @@ const Settings = ({ isMobile }) => {
     localStorage.setItem('lateEntryHour', lateEntryHour);
     localStorage.setItem('profileImagesPath', profileImagesPath);
     localStorage.setItem('scanImagesPath', scanImagesPath);
-    
+
     toast.success('Settings saved successfully! Please refresh the page to apply changes.');
   };
 
@@ -50,194 +54,194 @@ const Settings = ({ isMobile }) => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <PageHeader 
-        title="Settings" 
+      <PageHeader
+        title="Settings"
         description="Configure application settings and file paths"
       />
 
       <div className="flex-1 overflow-auto p-3 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
         <Card>
-        <CardHeader>
-          <CardTitle>Data Source Configuration</CardTitle>
-          <CardDescription>
-            Configure the file paths for scan logs and student allotments. 
-            By default, data is fetched from GitHub repository. You can change to local paths or other remote URLs.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Scan Logs Path */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              Scan Logs File Path
-            </label>
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <Input
-                  type="text"
-                  value={scanLogsPath}
-                  onChange={(e) => setScanLogsPath(e.target.value)}
-                  placeholder="https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_logs.csv"
-                  className="pl-10"
-                />
+          <CardHeader>
+            <CardTitle>Data Source Configuration</CardTitle>
+            <CardDescription>
+              Configure the file paths for scan logs and student allotments.
+              By default, data is fetched from GitHub repository. You can change to local paths or other remote URLs.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Scan Logs Path */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Scan Logs File Path
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Input
+                    type="text"
+                    value={scanLogsPath}
+                    onChange={(e) => setScanLogsPath(e.target.value)}
+                    placeholder="https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_logs.csv"
+                    className="pl-10"
+                  />
+                </div>
               </div>
+              <p className="text-xs text-slate-500">
+                Default: GitHub URL - https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_logs.csv
+              </p>
             </div>
-            <p className="text-xs text-slate-500">
-              Default: GitHub URL - https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_logs.csv
-            </p>
-          </div>
 
-          {/* Allotments Path */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              Allotments File Path
-            </label>
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <Input
-                  type="text"
-                  value={allotmentsPath}
-                  onChange={(e) => setAllotmentsPath(e.target.value)}
-                  placeholder="https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/allotments.csv"
-                  className="pl-10"
-                />
+            {/* Allotments Path */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Allotments File Path
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Input
+                    type="text"
+                    value={allotmentsPath}
+                    onChange={(e) => setAllotmentsPath(e.target.value)}
+                    placeholder="https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/allotments.csv"
+                    className="pl-10"
+                  />
+                </div>
               </div>
+              <p className="text-xs text-slate-500">
+                Default: GitHub URL - https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/allotments.csv
+              </p>
             </div>
-            <p className="text-xs text-slate-500">
-              Default: GitHub URL - https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/allotments.csv
-            </p>
-          </div>
 
-          {/* Late Entry Time */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              Late Entry Time (Hour)
-            </label>
-            <div className="flex gap-2 items-center">
-              <Input
-                type="number"
-                min="0"
-                max="23"
-                value={lateEntryHour}
-                onChange={(e) => setLateEntryHour(e.target.value)}
-                placeholder="22"
-                className="w-32"
-              />
-              <span className="text-sm text-slate-600 dark:text-slate-400">
-                :00 (24-hour format)
-              </span>
-            </div>
-            <p className="text-xs text-slate-500">
-              Default: 22 (10:00 PM). Entries after this hour will be marked as "Late Entry"
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Image Paths Configuration */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Image Path Configuration</CardTitle>
-          <CardDescription>
-            Configure the folder paths for student profile images and scan capture images
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Profile Images Path */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              Student Profile Images Folder
-            </label>
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            {/* Late Entry Time */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Late Entry Time (Hour)
+              </label>
+              <div className="flex gap-2 items-center">
                 <Input
-                  type="text"
-                  value={profileImagesPath}
-                  onChange={(e) => setProfileImagesPath(e.target.value)}
-                  placeholder="/images/students/"
-                  className="pl-10"
+                  type="number"
+                  min="0"
+                  max="23"
+                  value={lateEntryHour}
+                  onChange={(e) => setLateEntryHour(e.target.value)}
+                  placeholder="22"
+                  className="w-32"
                 />
+                <span className="text-sm text-slate-600 dark:text-slate-400">
+                  :00 (24-hour format)
+                </span>
               </div>
+              <p className="text-xs text-slate-500">
+                Default: 22 (10:00 PM). Entries after this hour will be marked as "Late Entry"
+              </p>
             </div>
-            <p className="text-xs text-slate-500">
-              Default: /images/students/ - Profile images should be named as {'{rollnumber}'}.png or .jpg
-            </p>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Scan Images Path */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              Scan Capture Images Folder
-            </label>
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <Input
-                  type="text"
-                  value={scanImagesPath}
-                  onChange={(e) => setScanImagesPath(e.target.value)}
-                  placeholder="/captured/"
-                  className="pl-10"
-                />
+        {/* Image Paths Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Image Path Configuration</CardTitle>
+            <CardDescription>
+              Configure the folder paths for student profile images and scan capture images
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Profile Images Path */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Student Profile Images Folder
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Input
+                    type="text"
+                    value={profileImagesPath}
+                    onChange={(e) => setProfileImagesPath(e.target.value)}
+                    placeholder="/images/students/"
+                    className="pl-10"
+                  />
+                </div>
               </div>
+              <p className="text-xs text-slate-500">
+                Default: /images/students/ - Profile images should be named as {'{rollnumber}'}.png or .jpg
+              </p>
             </div>
-            <p className="text-xs text-slate-500">
-              Default: /captured/ - Scan images are taken from the Image_Path column in CSV
-            </p>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
-            <Button onClick={handleSave} className="gap-2">
-              <Save size={16} />
-              Save Settings
-            </Button>
-            <Button variant="outline" onClick={handleReset}>
-              Reset to Default
-            </Button>
-          </div>
+            {/* Scan Images Path */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Scan Capture Images Folder
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Input
+                    type="text"
+                    value={scanImagesPath}
+                    onChange={(e) => setScanImagesPath(e.target.value)}
+                    placeholder="/captured/"
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-slate-500">
+                Default: /captured/ - Scan images are taken from the Image_Path column in CSV
+              </p>
+            </div>
 
-          {/* Info Box */}
-          <div className="p-4 bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-900 rounded-lg">
-            <h4 className="text-sm font-semibold text-cyan-900 dark:text-cyan-100 mb-2">
-              Image Path Notes:
-            </h4>
-            <ul className="text-sm text-cyan-800 dark:text-cyan-200 space-y-1 list-disc list-inside">
-              <li>Profile images: Named as rollnumber.png or rollnumber.jpg (e.g., 23021519-147.png)</li>
-              <li>Scan images: Automatically extracted from Image_Path column in CSV</li>
-              <li>Paths can be local (e.g., /images/) or remote URLs</li>
-              <li>Ensure proper folder structure and file permissions</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <Button onClick={handleSave} className="gap-2">
+                <Save size={16} />
+                Save Settings
+              </Button>
+              <Button variant="outline" onClick={handleReset}>
+                Reset to Default
+              </Button>
+            </div>
 
-      {/* Current Configuration Display */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Current Configuration</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Scan Logs:</span>
-            <code className="text-sm text-cyan-600 dark:text-cyan-400">{scanLogsPath}</code>
-          </div>
-          <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Late Entry Time:</span>
-            <code className="text-sm text-cyan-600 dark:text-cyan-400">{lateEntryHour}:00 ({lateEntryHour > 12 ? `${lateEntryHour - 12}:00 PM` : `${lateEntryHour}:00 AM`})</code>
-          </div>
-          <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Profile Images:</span>
-            <code className="text-sm text-cyan-600 dark:text-cyan-400">{profileImagesPath}</code>
-          </div>
-          <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Scan Images:</span>
-            <code className="text-sm text-cyan-600 dark:text-cyan-400">{scanImagesPath}</code>
-          </div>
-        </CardContent>
-      </Card>
+            {/* Info Box */}
+            <div className="p-4 bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-900 rounded-lg">
+              <h4 className="text-sm font-semibold text-cyan-900 dark:text-cyan-100 mb-2">
+                Image Path Notes:
+              </h4>
+              <ul className="text-sm text-cyan-800 dark:text-cyan-200 space-y-1 list-disc list-inside">
+                <li>Profile images: Named as rollnumber.png or rollnumber.jpg (e.g., 23021519-147.png)</li>
+                <li>Scan images: Automatically extracted from Image_Path column in CSV</li>
+                <li>Paths can be local (e.g., /images/) or remote URLs</li>
+                <li>Ensure proper folder structure and file permissions</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Current Configuration Display */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Current Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Scan Logs:</span>
+              <code className="text-sm text-cyan-600 dark:text-cyan-400">{scanLogsPath}</code>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Late Entry Time:</span>
+              <code className="text-sm text-cyan-600 dark:text-cyan-400">{lateEntryHour}:00 ({lateEntryHour > 12 ? `${lateEntryHour - 12}:00 PM` : `${lateEntryHour}:00 AM`})</code>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Profile Images:</span>
+              <code className="text-sm text-cyan-600 dark:text-cyan-400">{profileImagesPath}</code>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Scan Images:</span>
+              <code className="text-sm text-cyan-600 dark:text-cyan-400">{scanImagesPath}</code>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
