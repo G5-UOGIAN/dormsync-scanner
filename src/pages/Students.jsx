@@ -1,15 +1,179 @@
 import { useState, useMemo } from 'react';
-import { Search, MapPin, Phone, User, Home, Filter } from 'lucide-react';
+import { Search, MapPin, Phone, User, Home, X, Calendar, CreditCard } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent } from '../components/ui/card';
 import { Select, SelectItem } from '../components/ui/select';
 
+const StudentModal = ({ student, onClose }) => {
+  if (!student) return null;
+
+  const profileImagesPath = localStorage.getItem('profileImagesPath') || '/images/students/';
+  const rollNo = student['Roll No.']?.trim();
+  const profileImageUrl = rollNo ? `${profileImagesPath}${rollNo}.png` : null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+      <Card className="max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between p-3 sm:p-6 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex-1 min-w-0 pr-2">
+            <h2 className="text-lg sm:text-2xl font-semibold text-slate-900 dark:text-white truncate">Student Details</h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              {student['Roll No.']}
+            </p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} className="flex-shrink-0">
+            <X size={20} />
+          </Button>
+        </div>
+
+        <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-80px)] sm:max-h-[calc(90vh-100px)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
+            {/* Profile Image */}
+            <div className="space-y-2 sm:space-y-4">
+              {profileImageUrl && (
+                <div className="aspect-square bg-slate-100 dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800">
+                  <img
+                    src={profileImageUrl}
+                    alt="Student profile"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      if (e.target.src.endsWith('.png')) {
+                        e.target.src = `${profileImagesPath}${rollNo}.jpg`;
+                      } else {
+                        e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="300"%3E%3Crect fill="%23f1f5f9" width="300" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif" font-size="14"%3EProfile Not Available%3C/text%3E%3C/svg%3E';
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Student Info */}
+            <div className="space-y-2 sm:space-y-4">
+              <Card className="bg-cyan-50 dark:bg-cyan-950 border-cyan-200 dark:border-cyan-900">
+                <CardContent className="p-3 sm:p-6">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-cyan-600 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                      <User size={20} className="sm:w-6 sm:h-6" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm text-cyan-700 dark:text-cyan-400">Student Name</p>
+                      <p className="text-base sm:text-xl font-semibold text-cyan-900 dark:text-cyan-100 truncate">
+                        {student.Name}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-3 sm:pt-4 border-t border-cyan-200 dark:border-cyan-900">
+                    <p className="text-xs sm:text-sm text-cyan-700 dark:text-cyan-400">Roll Number</p>
+                    <p className="text-sm sm:text-lg font-medium text-cyan-900 dark:text-cyan-100 break-all">{student['Roll No.']}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                <Card>
+                  <CardContent className="p-2 sm:p-4">
+                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                      <Home size={14} className="text-cyan-600 flex-shrink-0" />
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Hostel</p>
+                    </div>
+                    <p className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white truncate">
+                      {student.Hostel || 'N/A'}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-2 sm:p-4">
+                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                      <MapPin size={14} className="text-cyan-600 flex-shrink-0" />
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Room</p>
+                    </div>
+                    <p className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white truncate">
+                      {student.Room || 'N/A'}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-2 sm:p-4">
+                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                      <Phone size={14} className="text-cyan-600 flex-shrink-0" />
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Contact</p>
+                    </div>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white truncate">
+                      {student.Contact || 'N/A'}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-2 sm:p-4">
+                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                      <Calendar size={14} className="text-cyan-600 flex-shrink-0" />
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Batch</p>
+                    </div>
+                    <p className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white truncate">
+                      {student.Batch || 'N/A'}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardContent className="p-2 sm:p-4">
+                  <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                    <CreditCard size={14} className="text-cyan-600 flex-shrink-0" />
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Mess Status</p>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white">
+                      {student['Mess Status'] || 'N/A'}
+                    </p>
+                    <Badge variant={student['Mess Status'] === 'ON' ? 'success' : 'secondary'} className="text-xs">
+                      {student['Mess Status'] === 'ON' ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {student.Arrears && student.Arrears !== '-' && (
+                <Card className="border-red-200 dark:border-red-900">
+                  <CardContent className="p-2 sm:p-4 bg-red-50 dark:bg-red-950">
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-1">Arrears</p>
+                    <p className="text-sm sm:text-lg font-semibold text-red-700 dark:text-red-300">
+                      {student.Arrears}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {student.TotalCollection && (
+                <Card>
+                  <CardContent className="p-2 sm:p-4">
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total Collection</p>
+                    <p className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white">
+                      {student.TotalCollection}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
 const Students = ({ allotments, isMobile }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHostel, setSelectedHostel] = useState('');
   const [selectedRoom, setSelectedRoom] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   const allotmentsList = useMemo(() => {
     return Object.values(allotments);
@@ -159,7 +323,11 @@ const Students = ({ allotments, isMobile }) => {
       <div className="flex-1 mt-3 overflow-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStudents.map((student, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
+            <Card 
+              key={index} 
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => setSelectedStudent(student)}
+            >
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <div className="w-12 h-12 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center text-cyan-600 dark:text-cyan-400 flex-shrink-0">
@@ -221,6 +389,13 @@ const Students = ({ allotments, isMobile }) => {
           </div>
         )}
       </div>
+
+      {selectedStudent && (
+        <StudentModal
+          student={selectedStudent}
+          onClose={() => setSelectedStudent(null)}
+        />
+      )}
     </div>
   );
 };

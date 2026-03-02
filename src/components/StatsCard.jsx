@@ -22,7 +22,7 @@ const StatsCard = ({ label, value, icon: Icon, description, variant = 'default' 
 
   return (
     <Card className={cn(variants[variant])}>
-      <CardContent className="p-6">
+      <CardContent className="p-4 md:p-6  ">
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">

@@ -15,8 +15,8 @@ const Login = ({ onLogin }) => {
     setLoading(true);
 
     // Get credentials from environment variables
-    const validUsername = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
-    const validPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+    const validUsername = import.meta.env.VITE_ADMIN_USERNAME || 'deputy.warden';
+    const validPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'wardenofficeclosed';
 
     setTimeout(() => {
       if (username === validUsername && password === validPassword) {

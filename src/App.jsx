@@ -291,25 +291,30 @@ const App = () => {
     return sorted;
   }, [filteredLogs, sortConfig]);
 
-  // Calculate stats
+  // Calculate stats (reactive to showUnique toggle)
   const stats = useMemo(() => {
-    const totalScans = logs.length;
-    const boarders = logs.filter(l => l.Status === 'Boarder').length;
-    const nonBoarders = logs.filter(l => l.Status === 'Non-Boarder').length;
-    const invalid = logs.filter(l => 
+    const dataToAnalyze = showUnique ? uniqueLogs : logs;
+    
+    const totalScans = dataToAnalyze.length;
+    const boarders = dataToAnalyze.filter(l => l.Status === 'Boarder').length;
+    const nonBoarders = dataToAnalyze.filter(l => l.Status === 'Non-Boarder').length;
+    const invalid = dataToAnalyze.filter(l => 
       l.Status !== 'Boarder' && l.Status !== 'Non-Boarder'
     ).length;
 
-    const lateEntryHour = parseInt(localStorage.getItem('lateEntryHour') || '22');
-    const lateEntries = logs.filter(log => 
-      moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss').hour() >= lateEntryHour
-    ).length;
+    // Calculate missing boarders
+    const scannedBoarderRollNos = new Set(
+      dataToAnalyze.filter(l => l.Status === 'Boarder').map(l => l['QR Code'])
+    );
+    const missingBoarders = Object.keys(allotments).length - scannedBoarderRollNos.size;
 
     // Calculate peak time
     const hourCounts = {};
-    logs.forEach(log => {
+    dataToAnalyze.forEach(log => {
       const hour = moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss').hour();
-      hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+      if (!isNaN(hour)) {
+        hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+      }
     });
 
     let peakHour = 0;
@@ -328,10 +333,10 @@ const App = () => {
       boarders,
       nonBoarders,
       invalid,
-      lateEntries,
+      missingBoarders,
       peakTime
     };
-  }, [logs]);
+  }, [logs, uniqueLogs, showUnique, allotments]);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -574,10 +579,10 @@ const App = () => {
               variant="default"
             />
             <StatsCard
-              label="Late Entries"
-              value={stats.lateEntries}
+              label="Missing Boarders"
+              value={stats.missingBoarders}
               icon={AlertTriangle}
-              description={`After ${localStorage.getItem('lateEntryHour') || '22'}:00`}
+              description="Haven't scanned"
               variant="warning"
             />
             <StatsCard

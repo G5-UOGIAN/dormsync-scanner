@@ -2,25 +2,39 @@ import { useMemo, useState } from 'react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import moment from 'moment';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
-import { Users, Clock, AlertTriangle, Calendar, Download, FileText, CalendarRange } from 'lucide-react';
+import { Users, Clock, AlertTriangle, Calendar, Download, FileText, CalendarRange, Filter } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PageHeader from '../components/PageHeader';
 import DateRangeModal from '../components/DateRangeModal';
 import { toast } from '../components/ui/toast';
 import { cn } from '../lib/utils';
 
-const Reports = ({ logs, allotments, isMobile }) => {
+const Reports = ({ logs, allotments, isMobile, showUnique, toggleUnique }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isCustomReportModalOpen, setIsCustomReportModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('analytics');
 
+  // Get unique logs (filter duplicates by QR Code)
+  const uniqueLogs = useMemo(() => {
+    if (!showUnique) return logs;
+    
+    const seen = new Set();
+    return logs.filter(log => {
+      const key = log['QR Code'];
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [logs, showUnique]);
+
   // Filter logs by date range
   const filteredLogs = useMemo(() => {
-    if (!startDate && !endDate) return logs;
+    const dataToFilter = showUnique ? uniqueLogs : logs;
+    if (!startDate && !endDate) return dataToFilter;
 
-    return logs.filter(log => {
+    return dataToFilter.filter(log => {
       const logDate = moment(log.DateTime).format('YYYY-MM-DD');
       
       if (startDate && endDate) {
@@ -33,7 +47,7 @@ const Reports = ({ logs, allotments, isMobile }) => {
       
       return true;
     });
-  }, [logs, startDate, endDate]);
+  }, [logs, uniqueLogs, showUnique, startDate, endDate]);
 
   const handleDateRangeApply = (start, end) => {
     setIsDateModalOpen(false);
@@ -445,6 +459,16 @@ const Reports = ({ logs, allotments, isMobile }) => {
         description="Visual insights and downloadable reports"
         actions={
           <div className="flex items-center gap-3">
+            {!isMobile && (
+              <Button
+                variant={showUnique ? 'default' : 'outline'}
+                onClick={toggleUnique}
+                className="gap-2"
+              >
+                <Filter size={16} />
+                {showUnique ? 'Unique' : 'All Entries'}
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => setIsDateModalOpen(true)}
@@ -463,6 +487,20 @@ const Reports = ({ logs, allotments, isMobile }) => {
       />
 
       <div className="flex-1 overflow-auto p-3 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
+        {/* Mobile controls */}
+        {isMobile && (
+          <div className="flex gap-2">
+            <Button
+              variant={showUnique ? 'default' : 'outline'}
+              onClick={toggleUnique}
+              size="sm"
+              className="flex-1 gap-2"
+            >
+              <Filter size={14} />
+              {showUnique ? 'Unique' : 'All'}
+            </Button>
+          </div>
+        )}
         {/* Tabs */}
         <div className="inline-flex h-10 items-center justify-center rounded-md bg-slate-100 p-1 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
           <button
@@ -502,185 +540,99 @@ const Reports = ({ logs, allotments, isMobile }) => {
                     {endDate ? moment(endDate).format('MMM DD, YYYY') : 'Now'}
                   </span>
                   {' '}({filteredLogs.length} records)
+                  {showUnique && <span className="text-cyan-600"> • Unique entries</span>}
                 </p>
               </div>
             )}
 
-            {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {/* Summary Stats - Smaller and more compact */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               <Card>
-                <CardContent className="p-4">
+                <CardContent className="p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-500">Total Scans</p>
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white">{filteredLogs.length}</p>
+                      <p className="text-xs text-slate-500">Total Scans</p>
+                      <p className="text-xl font-bold text-slate-900 dark:text-white">{filteredLogs.length}</p>
                     </div>
-                    <Users className="w-8 h-8 text-cyan-600" />
+                    <Users className="w-6 h-6 text-cyan-600" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-4">
+                <CardContent className="p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-500">Peak Hour</p>
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.peakHour}</p>
+                      <p className="text-xs text-slate-500">Peak Hour</p>
+                      <p className="text-xl font-bold text-slate-900 dark:text-white">{stats.peakHour}</p>
                       <p className="text-xs text-slate-500">{stats.peakCount} entries</p>
                     </div>
-                    <Clock className="w-8 h-8 text-cyan-600" />
+                    <Clock className="w-6 h-6 text-cyan-600" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-4">
+                <CardContent className="p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-500">Avg Per Day</p>
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.avgPerDay}</p>
+                      <p className="text-xs text-slate-500">Avg Per Day</p>
+                      <p className="text-xl font-bold text-slate-900 dark:text-white">{stats.avgPerDay}</p>
                       <p className="text-xs text-slate-500">Last {startDate && endDate ? moment(endDate).diff(moment(startDate), 'days') + 1 : 7} days</p>
                     </div>
-                    <Clock className="w-8 h-8 text-cyan-600" />
+                    <Clock className="w-6 h-6 text-cyan-600" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-4">
+                <CardContent className="p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-500">Late Entries</p>
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.lateEntries}</p>
+                      <p className="text-xs text-slate-500">Late Entries</p>
+                      <p className="text-xl font-bold text-slate-900 dark:text-white">{stats.lateEntries}</p>
                       <p className="text-xs text-slate-500">After {localStorage.getItem('lateEntryHour') || '22'}:00</p>
                     </div>
-                    <AlertTriangle className="w-8 h-8 text-cyan-600" />
+                    <AlertTriangle className="w-6 h-6 text-cyan-600" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-4">
+                <CardContent className="p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-500">Invalid Scans</p>
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.invalidEntries}</p>
+                      <p className="text-xs text-slate-500">Invalid Scans</p>
+                      <p className="text-xl font-bold text-slate-900 dark:text-white">{stats.invalidEntries}</p>
                       <p className="text-xs text-slate-500">Total invalid</p>
                     </div>
-                    <Users className="w-8 h-8 text-cyan-600" />
+                    <Users className="w-6 h-6 text-cyan-600" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Charts */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Status Distribution */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Entry Status Distribution</CardTitle>
-                  <CardDescription>Breakdown by entry type</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={statusData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, percentage }) => `${name}: ${percentage}%`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Late Entries */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>On-Time vs Late Entries</CardTitle>
-                  <CardDescription>Entry timing analysis</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={lateEntriesData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, percentage }) => `${percentage}%`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {lateEntriesData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Daily Trend */}
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Entry Trend</CardTitle>
-                  <CardDescription>Daily scan entries over time</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={dailyTrendData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="count" stroke="#06b6d4" strokeWidth={2} name="Entries" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Peak Times */}
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Peak Entry Times</CardTitle>
-                  <CardDescription>Hourly distribution of scan entries</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={peakTimesData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="hour" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="count" fill="#06b6d4" name="Number of Entries" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Peak Times Chart - Only chart shown */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Peak Entry Times</CardTitle>
+                <CardDescription>Hourly distribution of scan entries</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={peakTimesData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="hour" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="count" fill="#06b6d4" name="Number of Entries" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
           </>
         )}
 

@@ -3,7 +3,7 @@ import moment from 'moment';
 import { Badge } from './ui/badge';
 import { Card, CardContent } from './ui/card';
 
-const LogsGrid = ({ logs, allotments, onRowClick }) => {
+const LogsGrid = ({ logs, allotments, onCardClick }) => {
   const getStatusVariant = (status) => {
     if (status === 'Boarder') return 'success';
     if (status === 'Non-Boarder') return 'warning';
@@ -25,7 +25,7 @@ const LogsGrid = ({ logs, allotments, onRowClick }) => {
         return (
           <Card 
             key={i}
-            onClick={() => onRowClick(log)}
+            onClick={() => onCardClick(log)}
             className="hover:shadow-md transition-shadow cursor-pointer"
           >
             <CardContent className="p-4">
