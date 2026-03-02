@@ -126,6 +126,9 @@ VITE_ADMIN_PASSWORD=your_password
 
 # Session Timeout (in minutes)
 VITE_SESSION_TIMEOUT=30
+
+# GitHub Personal Access Token (for private repository access)
+VITE_GITHUB_PAT=your_github_personal_access_token
 ```
 
 **Security Notes:**
@@ -133,6 +136,12 @@ VITE_SESSION_TIMEOUT=30
 - Change default credentials before deployment
 - Session expires after 30 minutes of inactivity
 - Users must re-authenticate after session expiry
+
+**GitHub Token:**
+- Required if accessing data from a private GitHub repository
+- Create a Personal Access Token with `repo` scope at: https://github.com/settings/tokens
+- The token is automatically included in request headers when fetching from GitHub URLs
+- Without a valid token, requests to private repositories will fail with 404 errors
 
 ## Development
 

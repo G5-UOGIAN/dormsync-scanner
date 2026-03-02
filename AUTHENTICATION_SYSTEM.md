@@ -102,7 +102,15 @@ Create a `.env` file:
 VITE_ADMIN_USERNAME=admin
 VITE_ADMIN_PASSWORD=password123
 VITE_SESSION_TIMEOUT=30
+VITE_GITHUB_PAT=your_github_personal_access_token
 ```
+
+**GitHub Personal Access Token:**
+- Required for accessing private GitHub repositories
+- Create at: https://github.com/settings/tokens
+- Required scopes: `repo` (Full control of private repositories)
+- The token is automatically added to request headers when fetching from GitHub URLs
+- Format: `Authorization: token YOUR_TOKEN`
 
 ### Changing Credentials
 1. Update `.env` file with new credentials

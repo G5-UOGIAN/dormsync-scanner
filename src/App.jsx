@@ -24,7 +24,7 @@ import { Button } from './components/ui/button';
 
 const App = () => {
   // Authentication
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Data
   const [logs, setLogs] = useState([]);
@@ -95,17 +95,52 @@ const App = () => {
       setLoading(true);
       // https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_logs.csv
       // Get URLs from env or localStorage
-      const scanLogsUrl = import.meta.env.VITE_SCAN_LOGS_URL || 
+      let scanLogsUrl = import.meta.env.VITE_SCAN_LOGS_URL || 
                          localStorage.getItem('scanLogsPath') || 
                          '/scan_logs.csv';
       
-      const allotmentsUrl = scanLogsUrl.replace('scan_logs.csv', 'allotments.csv');
+      let allotmentsUrl = scanLogsUrl.replace('scan_logs.csv', 'allotments.csv');
+      
+      // Get GitHub token from environment
+      const githubToken = import.meta.env.VITE_GITHUB_PAT;
+      
+      // Convert raw.githubusercontent.com URLs to API URLs if token is present
+      if (githubToken && scanLogsUrl.includes('raw.githubusercontent.com')) {
+        // Convert: https://raw.githubusercontent.com/owner/repo/branch/path
+        // To: https://api.github.com/repos/owner/repo/contents/path?ref=branch
+        const rawUrlPattern = /https:\/\/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.+)/;
+        const match = scanLogsUrl.match(rawUrlPattern);
+        
+        if (match) {
+          const [, owner, repo, branch, path] = match;
+          scanLogsUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+          
+          const allotmentsPath = path.replace('scan_logs.csv', 'allotments.csv');
+          allotmentsUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${allotmentsPath}?ref=${branch}`;
+        }
+      }
+      
+      // Prepare headers
+      const headers = {};
+      if (githubToken && (scanLogsUrl.includes('api.github.com') || scanLogsUrl.includes('github'))) {
+        headers['Authorization'] = `token ${githubToken}`;
+        headers['Accept'] = 'application/vnd.github.v3.raw'; // Get raw content directly
+      }
       
       // Fetch both files
       const [logsResponse, allotmentsResponse] = await Promise.all([
-        fetch(scanLogsUrl),
-        fetch(allotmentsUrl)
+        fetch(scanLogsUrl, { headers }),
+        fetch(allotmentsUrl, { headers })
       ]);
+      
+      // Check for errors
+      if (!logsResponse.ok) {
+        throw new Error(`Failed to fetch scan logs: ${logsResponse.status} ${logsResponse.statusText}`);
+      }
+      
+      if (!allotmentsResponse.ok) {
+        throw new Error(`Failed to fetch allotments: ${allotmentsResponse.status} ${allotmentsResponse.statusText}`);
+      }
       
       const csvText = await logsResponse.text();
       const allotmentsText = await allotmentsResponse.text();

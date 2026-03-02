@@ -215,6 +215,16 @@ const Settings = ({ isMobile }) => {
                 <li>Ensure proper folder structure and file permissions</li>
               </ul>
             </div>
+
+            {/* GitHub Token Info */}
+            {/* <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
+              <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-2">
+                Private Repository Access:
+              </h4>
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                If accessing data from a private GitHub repository, ensure the <code className="px-1 py-0.5 bg-amber-100 dark:bg-amber-900 rounded">VITE_GITHUB_PAT</code> environment variable is set with a valid Personal Access Token. The token is automatically used for authentication when fetching from GitHub URLs.
+              </p>
+            </div> */}
           </CardContent>
         </Card>
 
