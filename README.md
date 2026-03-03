@@ -5,9 +5,10 @@ A professional Single Page Application (SPA) dashboard for hostel wardens, part 
 ## Features
 
 ### Authentication System
-- **Secure Login**: Username and password authentication via environment variables
+- **Dual Authentication**: Google OAuth and traditional username/password
+- **Domain Restriction**: Only @uog.edu.pk emails allowed via Google OAuth
+- **Authorized Users**: Explicit user management through Settings page
 - **Session Management**: 30-minute session timeout with automatic logout
-- **Session Validation**: Checks session validity every minute
 - **No Token Manipulation**: Cannot bypass authentication by modifying localStorage
 - **Environment-Based**: Credentials stored securely in `.env` file
 
@@ -129,6 +130,10 @@ VITE_SESSION_TIMEOUT=30
 
 # GitHub Personal Access Token (for private repository access)
 VITE_GITHUB_PAT=your_github_personal_access_token
+
+# Google OAuth Configuration
+VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
+VITE_ORGANIZATION_DOMAIN=uog.edu.pk
 ```
 
 **Security Notes:**
@@ -137,11 +142,12 @@ VITE_GITHUB_PAT=your_github_personal_access_token
 - Session expires after 30 minutes of inactivity
 - Users must re-authenticate after session expiry
 
-**GitHub Token:**
-- Required if accessing data from a private GitHub repository
-- Create a Personal Access Token with `repo` scope at: https://github.com/settings/tokens
-- The token is automatically included in request headers when fetching from GitHub URLs
-- Without a valid token, requests to private repositories will fail with 404 errors
+**Google OAuth:**
+- Create OAuth 2.0 credentials in Google Cloud Console
+- Add your domain to authorized JavaScript origins
+- Only @uog.edu.pk emails can authenticate
+- Users must be added to authorized list via Settings page
+- See `GOOGLE_OAUTH_SETUP.md` for detailed setup instructions
 
 ## Development
 
@@ -191,9 +197,11 @@ Deploy the `dist/` folder to any web server (Apache, Nginx, etc.)
 ## Usage
 
 ### Authentication
-1. **Login**: Enter username and password from `.env` file
-2. **Session**: Automatically logged out after 30 minutes of inactivity
-3. **Logout**: Click logout button in sidebar to end session manually
+1. **Google OAuth**: Click "Continue with Google" and sign in with @uog.edu.pk email
+2. **Traditional Login**: Enter username and password from `.env` file
+3. **Authorization**: Google users must be added to authorized list in Settings
+4. **Session**: Automatically logged out after 30 minutes of inactivity
+5. **Logout**: Click logout button in sidebar to end session manually
 
 ### Dashboard
 1. **Shows all records by default** (no date filter on initial load)

@@ -2,6 +2,7 @@
 
 const AUTH_KEY = 'dormsyncscanner_auth';
 const SESSION_KEY = 'dormsyncscanner_session';
+const USER_KEY = 'dormsyncscanner_user';
 const SESSION_TIMEOUT = parseInt(import.meta.env.VITE_SESSION_TIMEOUT || '30') * 60 * 1000; // Convert minutes to milliseconds
 
 /**
@@ -17,14 +18,27 @@ export const validateCredentials = (username, password) => {
 /**
  * Create a new session with timestamp
  */
-export const createSession = () => {
+export const createSession = (userInfo = null) => {
   const sessionData = {
     timestamp: Date.now(),
-    expiresAt: Date.now() + SESSION_TIMEOUT
+    expiresAt: Date.now() + SESSION_TIMEOUT,
+    authMethod: userInfo ? 'google' : 'credentials'
   };
   
   localStorage.setItem(AUTH_KEY, 'true');
   localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+  
+  if (userInfo) {
+    localStorage.setItem(USER_KEY, JSON.stringify(userInfo));
+  }
+};
+
+/**
+ * Get current user info
+ */
+export const getCurrentUser = () => {
+  const userInfo = localStorage.getItem(USER_KEY);
+  return userInfo ? JSON.parse(userInfo) : null;
 };
 
 /**
@@ -62,6 +76,7 @@ export const isSessionValid = () => {
 export const clearSession = () => {
   localStorage.removeItem(AUTH_KEY);
   localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(USER_KEY);
 };
 
 /**
@@ -86,6 +101,23 @@ export const getRemainingTime = () => {
  */
 export const extendSession = () => {
   if (isSessionValid()) {
-    createSession();
+    const currentUser = getCurrentUser();
+    createSession(currentUser);
+  }
+};
+
+/**
+ * Get authentication method
+ */
+export const getAuthMethod = () => {
+  const sessionData = localStorage.getItem(SESSION_KEY);
+  
+  if (!sessionData) return null;
+  
+  try {
+    const session = JSON.parse(sessionData);
+    return session.authMethod || 'credentials';
+  } catch (error) {
+    return null;
   }
 };

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Save, FolderOpen } from 'lucide-react';
+import { Save, FolderOpen, Plus, Trash2, Users, Mail } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 import { toast } from '../components/ui/toast';
+import { getAuthorizedUsers, addAuthorizedUser, removeAuthorizedUser, isOrganizationEmail } from '../utils/googleAuth';
 import PageHeader from '../components/PageHeader';
 
 const Settings = ({ isMobile }) => {
@@ -12,6 +14,8 @@ const Settings = ({ isMobile }) => {
   const [lateEntryHour, setLateEntryHour] = useState('22');
   const [profileImagesPath, setProfileImagesPath] = useState('');
   const [scanImagesPath, setScanImagesPath] = useState('');
+  const [authorizedUsers, setAuthorizedUsers] = useState([]);
+  const [newUserEmail, setNewUserEmail] = useState('');
 
   useEffect(() => {
     // Load saved paths from localStorage
@@ -30,6 +34,9 @@ const Settings = ({ isMobile }) => {
     setLateEntryHour(savedLateEntryHour);
     setProfileImagesPath(savedProfileImagesPath);
     setScanImagesPath(savedScanImagesPath);
+    
+    // Load authorized users
+    setAuthorizedUsers(getAuthorizedUsers());
   }, []);
 
   const handleSave = () => {
@@ -52,14 +59,131 @@ const Settings = ({ isMobile }) => {
     toast.info('Settings reset to default values');
   };
 
+  const handleAddUser = () => {
+    if (!newUserEmail.trim()) {
+      toast.error('Please enter an email address');
+      return;
+    }
+
+    if (!isOrganizationEmail(newUserEmail)) {
+      toast.error(`Only @${import.meta.env.VITE_ORGANIZATION_DOMAIN || 'uog.edu.pk'} emails are allowed`);
+      return;
+    }
+
+    if (authorizedUsers.includes(newUserEmail)) {
+      toast.error('User is already authorized');
+      return;
+    }
+
+    const updatedUsers = addAuthorizedUser(newUserEmail);
+    setAuthorizedUsers(updatedUsers);
+    setNewUserEmail('');
+    toast.success('User added successfully');
+  };
+
+  const handleRemoveUser = (email) => {
+    const updatedUsers = removeAuthorizedUser(email);
+    setAuthorizedUsers(updatedUsers);
+    toast.success('User removed successfully');
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <PageHeader
         title="Settings"
-        description="Configure application settings and file paths"
+        description="Configure application settings and manage access"
       />
 
       <div className="flex-1 overflow-auto p-3 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
+        {/* Authorized Users Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Authorized Users
+            </CardTitle>
+            <CardDescription>
+              Manage users who can access the system via Google OAuth. Only @{import.meta.env.VITE_ORGANIZATION_DOMAIN || 'uog.edu.pk'} emails are allowed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Add New User */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Add New User
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Input
+                    type="email"
+                    value={newUserEmail}
+                    onChange={(e) => setNewUserEmail(e.target.value)}
+                    placeholder={`user@${import.meta.env.VITE_ORGANIZATION_DOMAIN || 'uog.edu.pk'}`}
+                    className="pl-10"
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddUser()}
+                  />
+                </div>
+                <Button onClick={handleAddUser} className="gap-2">
+                  <Plus size={16} />
+                  Add
+                </Button>
+              </div>
+            </div>
+
+            {/* Current Users List */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Current Authorized Users ({authorizedUsers.length})
+              </label>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {authorizedUsers.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    No authorized users configured
+                  </div>
+                ) : (
+                  authorizedUsers.map((email, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-cyan-100 dark:bg-cyan-950 rounded-full flex items-center justify-center">
+                          <Mail className="w-4 h-4 text-cyan-600" />
+                        </div>
+                        <span className="text-sm font-medium text-slate-900 dark:text-white">
+                          {email}
+                        </span>
+                        <Badge variant="outline" className="text-xs">
+                          UOG
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveUser(email)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Info Box */}
+            <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
+              <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                Google OAuth Access Control:
+              </h4>
+              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
+                <li>Only users with @{import.meta.env.VITE_ORGANIZATION_DOMAIN || 'uog.edu.pk'} emails are allowed</li>
+                <li>Users must be explicitly added to this authorized list</li>
+                <li>Changes take effect immediately</li>
+                <li>Users can also sign in using traditional username/password</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Data Source Configuration</CardTitle>
