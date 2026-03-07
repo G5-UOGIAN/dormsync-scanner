@@ -35,8 +35,10 @@ export const getAuthorizedUsers = () => {
   if (!users) {
     // Default authorized users
     const defaultUsers = [
+      '23021519-058@uog.edu.pk',
+      'mustafa@uog.edu.pk',
       'najeeb.rehman@uog.edu.pk',
-      '23021519-058@uog.edu.pk'
+      'moeen.khalid@uog.edu.pk'
     ];
     localStorage.setItem('dormsyncscanner_authorized_users', JSON.stringify(defaultUsers));
     return defaultUsers;
