@@ -163,7 +163,7 @@ const Settings = ({ isMobile }) => {
                 </div>
               </div>
               <p className="text-xs text-slate-500">
-                Default: /images/students/ - Profile images should be named as {'{rollnumber}'} with supported formats: .png, .jpg, .jpeg, .PNG, .JPG, .JPEG, .webp, .WEBP, .heic, .HEIC
+                Default: /images/students/ - Profile images should be named as {'{rollnumber}'}.png or .jpg
               </p>
             </div>
 
@@ -206,9 +206,7 @@ const Settings = ({ isMobile }) => {
                 Image Path Notes:
               </h4>
               <ul className="text-sm text-cyan-800 dark:text-cyan-200 space-y-1 list-disc list-inside">
-                <li>Profile images: Named as rollnumber with any supported format (e.g., 23021519-147.png, 23021519-147.jpg, 23021519-147.HEIC)</li>
-                <li>Supported formats: .png, .jpg, .jpeg, .PNG, .JPG, .JPEG, .webp, .WEBP, .heic, .HEIC</li>
-                <li>System automatically tries all formats until one loads successfully</li>
+                <li>Profile images: Named as rollnumber.png or rollnumber.jpg (e.g., 23021519-147.png)</li>
                 <li>Scan images: Automatically extracted from Image_Path column in CSV</li>
                 <li>Paths can be local (e.g., /images/) or remote URLs</li>
                 <li>Ensure proper folder structure and file permissions</li>
