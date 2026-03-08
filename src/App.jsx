@@ -93,13 +93,13 @@ const App = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      // https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_logs.csv
+      // https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_log.csv
       // Get URLs from env or localStorage
       let scanLogsUrl = import.meta.env.VITE_SCAN_LOGS_URL || 
                          localStorage.getItem('scanLogsPath') || 
-                         '/scan_logs.csv';
+                         '/scan_log.csv';
       
-      let allotmentsUrl = scanLogsUrl.replace('scan_logs.csv', 'allotments.csv');
+      let allotmentsUrl = scanLogsUrl.replace('scan_log.csv', 'allotments.csv');
       
       // Get GitHub token from environment
       const githubToken = import.meta.env.VITE_GITHUB_PAT;
@@ -116,7 +116,7 @@ const App = () => {
           const [, owner, repo, branch, path] = match;
           scanLogsUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
           
-          const allotmentsPath = path.replace('scan_logs.csv', 'allotments.csv');
+          const allotmentsPath = path.replace('scan_log.csv', 'allotments.csv');
           allotmentsUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${allotmentsPath}?ref=${branch}`;
         }
       }
@@ -185,16 +185,33 @@ const App = () => {
               }
               return row.Date_ && row.QR_Code && row.QR_Code !== 'NULL';
             })
-            .map(row => ({
-              DateTime: `${row.Date_?.trim()} ${row.Time?.trim()}`,
-              'QR Code': row.QR_Code?.trim(),
-              Status: row.Status?.trim(),
-              Name: row.Name?.trim(),
-              Hostel: row.Hostel?.trim(),
-              Room: row.RoomNo?.trim(),
-              Mobile: row.MobileNo?.trim(),
-              ImagePath: row.Image_Path?.trim()
-            }));
+            .map(row => {
+              // Clean date and time, removing any extra spaces or commas
+              const date = row.Date_?.trim().replace(/,\s*$/, ''); // Remove trailing comma and spaces
+              const time = row.Time?.trim().replace(/^\s*,?\s*/, ''); // Remove leading comma and spaces
+              
+              // Construct DateTime string
+              const dateTimeStr = `${date} ${time}`;
+              
+              // Parse with moment using the exact format
+              const parsedDate = moment(dateTimeStr, 'DD/MM/YYYY HH:mm:ss', true);
+              
+              // Log any invalid dates for debugging
+              if (!parsedDate.isValid()) {
+                console.warn('Invalid date:', dateTimeStr, 'from row:', row);
+              }
+              
+              return {
+                DateTime: dateTimeStr,
+                'QR Code': row.QR_Code?.trim(),
+                Status: row.Status?.trim(),
+                Name: row.Name?.trim(),
+                Hostel: row.Hostel?.trim(),
+                Room: row.RoomNo?.trim(),
+                Mobile: row.MobileNo?.trim(),
+                ImagePath: row.Image_Path?.trim()
+              };
+            });
 
           setLogs(processedLogs);
           
@@ -202,11 +219,14 @@ const App = () => {
           if (processedLogs.length > 0) {
             // Find the most recent scan by parsing all dates
             const sortedByDate = [...processedLogs].sort((a, b) => {
-              const dateA = moment(a.DateTime, 'DD/MM/YYYY HH:mm:ss');
-              const dateB = moment(b.DateTime, 'DD/MM/YYYY HH:mm:ss');
+              const dateA = moment(a.DateTime, 'DD/MM/YYYY HH:mm:ss', true);
+              const dateB = moment(b.DateTime, 'DD/MM/YYYY HH:mm:ss', true);
               return dateB.valueOf() - dateA.valueOf();
             });
-            setLastScan(moment(sortedByDate[0].DateTime, 'DD/MM/YYYY HH:mm:ss').toDate());
+            const lastScanDate = moment(sortedByDate[0].DateTime, 'DD/MM/YYYY HH:mm:ss', true);
+            if (lastScanDate.isValid()) {
+              setLastScan(lastScanDate.toDate());
+            }
           }
           
           setLoading(false);
@@ -245,7 +265,7 @@ const App = () => {
     // Date range filter
     if (startDate || endDate) {
       filtered = filtered.filter(log => {
-        const logDate = moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss').format('YYYY-MM-DD');
+        const logDate = moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss', true).format('YYYY-MM-DD');
         
         if (startDate && endDate) {
           return logDate >= startDate && logDate <= endDate;
@@ -263,7 +283,7 @@ const App = () => {
     if (filterTab === 'late') {
       const lateEntryHour = parseInt(localStorage.getItem('lateEntryHour') || '22');
       filtered = filtered.filter(log => {
-        const hour = moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss').hour();
+        const hour = moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss', true).hour();
         return hour >= lateEntryHour;
       });
     } else if (filterTab === 'boarder') {
@@ -321,8 +341,8 @@ const App = () => {
           bValue = b.Name || '';
           break;
         case 'time':
-          aValue = moment(a.DateTime, 'DD/MM/YYYY HH:mm:ss').valueOf();
-          bValue = moment(b.DateTime, 'DD/MM/YYYY HH:mm:ss').valueOf();
+          aValue = moment(a.DateTime, 'DD/MM/YYYY HH:mm:ss', true).valueOf();
+          bValue = moment(b.DateTime, 'DD/MM/YYYY HH:mm:ss', true).valueOf();
           break;
         case 'room':
           aValue = a.Room || '';
@@ -364,7 +384,7 @@ const App = () => {
     // Calculate peak time
     const hourCounts = {};
     dataToAnalyze.forEach(log => {
-      const hour = moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss').hour();
+      const hour = moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss', true).hour();
       if (!isNaN(hour)) {
         hourCounts[hour] = (hourCounts[hour] || 0) + 1;
       }

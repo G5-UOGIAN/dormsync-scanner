@@ -35,8 +35,10 @@ export const getAuthorizedUsers = () => {
   if (!users) {
     // Default authorized users
     const defaultUsers = [
+      '23021519-058@uog.edu.pk',
+      'mustafa@uog.edu.pk',
       'najeeb.rehman@uog.edu.pk',
-      '23021519-058@uog.edu.pk'
+      'moeen.khalid@uog.edu.pk'
     ];
     localStorage.setItem('dormsyncscanner_authorized_users', JSON.stringify(defaultUsers));
     return defaultUsers;
@@ -81,7 +83,7 @@ export const isUserAuthorized = (email) => {
   if (!isOrganizationEmail(email)) {
     return false;
   }
-  
+
   const authorizedUsers = getAuthorizedUsers();
   return authorizedUsers.includes(email);
 };
@@ -94,7 +96,7 @@ export const handleGoogleResponse = (response) => {
     try {
       // Decode JWT token
       const payload = JSON.parse(atob(response.credential.split('.')[1]));
-      
+
       const userInfo = {
         email: payload.email,
         name: payload.name,
@@ -132,7 +134,7 @@ export const handleGoogleResponse = (response) => {
  */
 export const initializeGoogleSignIn = (onSuccess, onError) => {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  
+
   if (!clientId) {
     onError(new Error('Google Client ID not configured'));
     return;

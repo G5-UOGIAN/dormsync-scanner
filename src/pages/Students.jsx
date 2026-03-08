@@ -5,13 +5,15 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent } from '../components/ui/card';
 import { Select, SelectItem } from '../components/ui/select';
+import { handleImageErrorSimple } from '../utils/imageLoader';
 
 const StudentModal = ({ student, onClose }) => {
   if (!student) return null;
 
   const profileImagesPath = localStorage.getItem('profileImagesPath') || '/images/students/';
   const rollNo = student['Roll No.']?.trim();
-  const profileImageUrl = rollNo ? `${profileImagesPath}${rollNo}.png` : null;
+  const profileImageBasePath = rollNo ? `${profileImagesPath}${rollNo}` : null;
+  const profileImageUrl = profileImageBasePath ? `${profileImageBasePath}.png` : null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
@@ -39,13 +41,7 @@ const StudentModal = ({ student, onClose }) => {
                     src={profileImageUrl}
                     alt="Student profile"
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      if (e.target.src.endsWith('.png')) {
-                        e.target.src = `${profileImagesPath}${rollNo}.jpg`;
-                      } else {
-                        e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="300"%3E%3Crect fill="%23f1f5f9" width="300" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif" font-size="14"%3EProfile Not Available%3C/text%3E%3C/svg%3E';
-                      }
-                    }}
+                    onError={(e) => handleImageErrorSimple(e, profileImageBasePath)}
                   />
                 </div>
               )}

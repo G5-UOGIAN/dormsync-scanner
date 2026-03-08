@@ -15,7 +15,7 @@ const LogsTable = ({ logs, allotments, onRowClick, sortConfig, onSort }) => {
   };
 
   const isLateEntry = (dateTime, lateEntryHour) => {
-    const hour = moment(dateTime).hour();
+    const hour = moment(dateTime, 'DD/MM/YYYY HH:mm:ss', true).hour();
     return hour >= lateEntryHour;
   };
 
@@ -87,10 +87,10 @@ const LogsTable = ({ logs, allotments, onRowClick, sortConfig, onSort }) => {
               {/* Scan Time */}
               <div className="col-span-3 flex flex-col justify-center">
                 <span className="text-sm font-medium text-slate-900 dark:text-white">
-                  {moment(log.DateTime).format('hh:mm A')}
+                  {moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss', true).format('hh:mm A')}
                 </span>
                 <span className="text-sm text-slate-500">
-                  {moment(log.DateTime).format('DD MMM YYYY')}
+                  {moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss', true).format('DD MMM YYYY')}
                 </span>
                 {isLate && (
                   <Badge variant="destructive" className="mt-1 w-fit">Late Entry</Badge>

@@ -3,6 +3,7 @@ import moment from 'moment';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Card, CardContent } from './ui/card';
+import { handleImageErrorSimple, getPlaceholderImage } from '../utils/imageLoader';
 
 const ImageModal = ({ log, student, onClose }) => {
   if (!log) return null;
@@ -15,9 +16,10 @@ const ImageModal = ({ log, student, onClose }) => {
   const imagePath = log.ImagePath?.replace(/\\/g, '/').split('/').pop();
   const scanImageUrl = `${scanImagesPath}${imagePath}`;
   
-  // Profile image based on roll number
+  // Profile image based on roll number (start with .png)
   const rollNo = log['QR Code']?.trim();
-  const profileImageUrl = rollNo ? `${profileImagesPath}${rollNo}.png` : null;
+  const profileImageBasePath = rollNo ? `${profileImagesPath}${rollNo}` : null;
+  const profileImageUrl = profileImageBasePath ? `${profileImageBasePath}.png` : null;
 
   // Check if entry is late
   const lateEntryHour = parseInt(localStorage.getItem('lateEntryHour') || '22');
@@ -57,7 +59,7 @@ const ImageModal = ({ log, student, onClose }) => {
                   alt="Scan capture"
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f1f5f9" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif" font-size="14"%3EScan Image Not Available%3C/text%3E%3C/svg%3E';
+                    e.target.src = getPlaceholderImage('Scan Image Not Available');
                   }}
                 />
               </div>
@@ -69,14 +71,7 @@ const ImageModal = ({ log, student, onClose }) => {
                     src={profileImageUrl}
                     alt="Student profile"
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Try .jpg extension if .png fails
-                      if (e.target.src.endsWith('.png')) {
-                        e.target.src = `${profileImagesPath}${rollNo}.jpg`;
-                      } else {
-                        e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="300"%3E%3Crect fill="%23f1f5f9" width="300" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif" font-size="14"%3EProfile Not Available%3C/text%3E%3C/svg%3E';
-                      }
-                    }}
+                    onError={(e) => handleImageErrorSimple(e, profileImageBasePath)}
                   />
                 </div>
               )}

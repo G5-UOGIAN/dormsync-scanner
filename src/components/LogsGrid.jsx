@@ -11,7 +11,7 @@ const LogsGrid = ({ logs, allotments, onCardClick }) => {
   };
 
   const isLateEntry = (dateTime, lateEntryHour) => {
-    const hour = moment(dateTime).hour();
+    const hour = moment(dateTime, 'DD/MM/YYYY HH:mm:ss', true).hour();
     return hour >= lateEntryHour;
   };
 
@@ -43,7 +43,7 @@ const LogsGrid = ({ logs, allotments, onCardClick }) => {
                     <div className="flex items-center gap-2 text-sm">
                       <Clock size={14} className="text-cyan-600 flex-shrink-0" />
                       <span className="text-slate-600 dark:text-slate-400">
-                        {moment(log.DateTime).format('hh:mm A, DD MMM YYYY')}
+                        {moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss', true).format('hh:mm A, DD MMM YYYY')}
                       </span>
                     </div>
                     
