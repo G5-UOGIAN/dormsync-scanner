@@ -684,7 +684,7 @@ const App = () => {
               </p>
             </div>
 
-            <div className="p-3 md:p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
+            <div className="p-1 md:p-2 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 overflow-x-auto">
                   <Tabs value={filterTab} onValueChange={handleTabChange}>
@@ -765,7 +765,7 @@ const App = () => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-auto max-h-44 sm:max-h-58 md:max-h-68 lg:max-h-88 xl:max-h-104 p-2 sm:p-0">
+            <div className="flex-1 overflow-auto" style={{ maxHeight: 'calc(100svh - 490px)' }}>
               {loading ? (
                 <div className="flex items-center justify-center h-full min-h-[150px] sm:min-h-[300px]">
                   <div className="text-center">

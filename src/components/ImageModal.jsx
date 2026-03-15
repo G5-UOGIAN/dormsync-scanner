@@ -1,8 +1,10 @@
-import { X, User, MapPin, Phone, Clock } from 'lucide-react';
+import { X, MapPin, Phone, Clock } from 'lucide-react';
+import { useState } from 'react';
 import moment from 'moment';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { handleImageErrorSimple, getPlaceholderImage } from '../utils/imageLoader';
+import FullscreenImageViewer from './FullscreenImageViewer';
 
 const ImageModal = ({ log, student, onClose }) => {
   if (!log) return null;
@@ -26,6 +28,8 @@ const ImageModal = ({ log, student, onClose }) => {
     if (status === 'Non-Boarder') return 'warning';
     return 'destructive';
   };
+
+  const [fullscreenBasePath, setFullscreenBasePath] = useState(null);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3">
@@ -57,7 +61,10 @@ const ImageModal = ({ log, student, onClose }) => {
           {/* Student identity row */}
           <div className="flex items-center gap-3">
             {profileImageUrl && (
-              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-800 flex-shrink-0">
+              <div
+                className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-800 flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-cyan-500 transition-all"
+                onClick={() => setFullscreenBasePath(profileImageBasePath)}
+              >
                 <img
                   src={profileImageUrl}
                   alt="Profile"
@@ -112,6 +119,13 @@ const ImageModal = ({ log, student, onClose }) => {
           )}
         </div>
       </div>
+      {fullscreenBasePath && (
+        <FullscreenImageViewer
+          basePath={fullscreenBasePath}
+          alt="Profile photo"
+          onClose={() => setFullscreenBasePath(null)}
+        />
+      )}
     </div>
   );
 };

@@ -6,9 +6,12 @@ import { Badge } from '../components/ui/badge';
 import { Card, CardContent } from '../components/ui/card';
 import { Select, SelectItem } from '../components/ui/select';
 import { handleImageErrorSimple } from '../utils/imageLoader';
+import FullscreenImageViewer from '../components/FullscreenImageViewer';
 
 const StudentModal = ({ student, onClose }) => {
   if (!student) return null;
+
+  const [fullscreenBasePath, setFullscreenBasePath] = useState(null);
 
   const profileImagesPath = localStorage.getItem('profileImagesPath') || '/images/students/';
   const rollNo = student['Roll No.']?.trim();
@@ -22,7 +25,6 @@ const StudentModal = ({ student, onClose }) => {
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
           <div>
             <h2 className="text-base font-semibold text-slate-900 dark:text-white">Student Details</h2>
-            <p className="text-xs text-slate-500">{student['Roll No.']}</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
             <X size={16} />
@@ -33,7 +35,10 @@ const StudentModal = ({ student, onClose }) => {
           {/* Identity row */}
           <div className="flex items-center gap-3">
             {profileImageUrl ? (
-              <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-800 flex-shrink-0">
+              <div
+                className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-800 flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-cyan-500 transition-all"
+                onClick={() => setFullscreenBasePath(profileImageBasePath)}
+              >
                 <img
                   src={profileImageUrl}
                   alt="Profile"
@@ -91,6 +96,13 @@ const StudentModal = ({ student, onClose }) => {
           </div>
         </div>
       </div>
+      {fullscreenBasePath && (
+        <FullscreenImageViewer
+          basePath={fullscreenBasePath}
+          alt="Profile photo"
+          onClose={() => setFullscreenBasePath(null)}
+        />
+      )}
     </div>
   );
 };
@@ -101,6 +113,8 @@ const Students = ({ allotments, isMobile }) => {
   const [selectedHostel, setSelectedHostel] = useState('');
   const [selectedRoom, setSelectedRoom] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
+
+  const profileImagesPath = localStorage.getItem('profileImagesPath') || '/images/students/';
 
   const allotmentsList = useMemo(() => {
     return Object.values(allotments);
@@ -265,9 +279,25 @@ const Students = ({ allotments, isMobile }) => {
               <CardContent className="p-3">
                 {/* Top row: avatar + name + roll */}
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center text-cyan-600 dark:text-cyan-400 flex-shrink-0">
-                    <User size={18} />
-                  </div>
+                  {(() => {
+                    const sRollNo = student['Roll No.']?.trim();
+                    const sBasePath = sRollNo ? `${profileImagesPath}${sRollNo}` : null;
+                    const sImgUrl = sBasePath ? `${sBasePath}.png` : null;
+                    return (
+                      <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-950 overflow-hidden flex items-center justify-center text-cyan-600 dark:text-cyan-400 flex-shrink-0">
+                        {sImgUrl ? (
+                          <img
+                            src={sImgUrl}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                            onError={(e) => handleImageErrorSimple(e, sBasePath)}
+                          />
+                        ) : (
+                          <User size={18} />
+                        )}
+                      </div>
+                    );
+                  })()}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm text-slate-900 dark:text-white truncate">
                       {student.Name}
