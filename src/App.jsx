@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Papa from 'papaparse';
 import moment from 'moment';
-import { Users, ShieldAlert, AlertTriangle, Search, Calendar, LayoutGrid, List, Filter, Activity } from 'lucide-react';
+import { Users, ShieldAlert, AlertTriangle, Search, Calendar, LayoutGrid, List, Filter, Activity, X } from 'lucide-react';
 import { cn } from './lib/utils';
 import { isSessionValid, clearSession } from './utils/auth';
 
@@ -46,6 +46,8 @@ const App = () => {
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showUnique, setShowUnique] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
 
   // Check authentication on mount and set up session checking
   useEffect(() => {
@@ -445,16 +447,6 @@ const App = () => {
     }));
   };
 
-  const handleSearch = () => {
-    // Search is reactive, no action needed
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
   const handleDateRangeApply = (start, end) => {
     setIsDateModalOpen(false);
     setStartDate(start);
@@ -537,6 +529,7 @@ const App = () => {
         "flex-1 flex flex-col overflow-hidden",
         isMobile && "pb-16"
       )}>
+        {!isMobile && (
         <PageHeader 
           title="Dashboard" 
           description="Monitor and manage hostel scan entries"
@@ -546,48 +539,52 @@ const App = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <Input
                   type="text"
-                  placeholder={isMobile ? "Search..." : "Search by name or roll number..."}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  placeholder="Search by name or roll number..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') setSearchTerm(searchInput);
+                  }}
                   className="pl-10"
                 />
               </div>
-              {!isMobile && (
-                <Button onClick={handleSearch}>
-                  Search
+              <Button onClick={() => setSearchTerm(searchInput)}>
+                Search
+              </Button>
+              {searchTerm && (
+                <Button variant="outline" onClick={() => { setSearchTerm(''); setSearchInput(''); }}>
+                  Clear
                 </Button>
               )}
             </div>
           }
           actions={
-            !isMobile && (
-              <div className="flex items-center gap-3">
-                <Button
-                  variant={showUnique ? 'default' : 'outline'}
-                  onClick={toggleUnique}
-                  className="gap-2"
-                >
-                  <Filter size={16} />
-                  {showUnique ? 'Unique' : 'All Entries'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDateModalOpen(true)}
-                  className="gap-2"
-                >
-                  <Calendar size={16} />
-                  {startDate || endDate ? 'Change Range' : 'Date Range'}
-                </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                variant={showUnique ? 'default' : 'outline'}
+                onClick={toggleUnique}
+                className="gap-2"
+              >
+                <Filter size={16} />
+                {showUnique ? 'Unique' : 'All Entries'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsDateModalOpen(true)}
+                className="gap-2"
+              >
+                <Calendar size={16} />
+                {startDate || endDate ? 'Change Range' : 'Date Range'}
+              </Button>
                 {(startDate || endDate) && (
                   <Button variant="outline" onClick={clearDateRange}>
                     Clear
                   </Button>
                 )}
               </div>
-            )
           }
         />
+        )}
 
         <div className="flex-1 overflow-hidden p-3 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
           {/* Mobile controls */}
@@ -610,6 +607,14 @@ const App = () => {
               >
                 <Calendar size={14} />
                 Range
+              </Button>
+              <Button
+                variant={searchTerm ? 'default' : 'outline'}
+                onClick={() => { setSearchInput(searchTerm); setIsSearchModalOpen(true); }}
+                size="sm"
+                className="gap-1 px-3"
+              >
+                <Search size={14} />
               </Button>
               {(startDate || endDate) && (
                 <Button variant="outline" onClick={clearDateRange} size="sm">
@@ -823,6 +828,68 @@ const App = () => {
           currentStartDate={startDate}
           currentEndDate={endDate}
         />
+
+        {/* Mobile Search Modal */}
+        {isSearchModalOpen && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4 pt-16">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-sm p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white">Search</h3>
+                <button
+                  onClick={() => setIsSearchModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Input
+                  type="text"
+                  placeholder="Search by name or roll number..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setSearchTerm(searchInput);
+                      setIsSearchModalOpen(false);
+                    }
+                  }}
+                  className="pl-10"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1"
+                  onClick={() => {
+                    setSearchTerm(searchInput);
+                    setIsSearchModalOpen(false);
+                  }}
+                >
+                  Search
+                </Button>
+                {searchTerm && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setSearchInput('');
+                      setIsSearchModalOpen(false);
+                    }}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+              {searchTerm && (
+                <p className="text-xs text-cyan-600 dark:text-cyan-400">
+                  Active: "{searchTerm}"
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {isMobile && (
           <Sidebar 

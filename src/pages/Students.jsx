@@ -167,6 +167,7 @@ const StudentModal = ({ student, onClose }) => {
 
 const Students = ({ allotments, isMobile }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [selectedHostel, setSelectedHostel] = useState('');
   const [selectedRoom, setSelectedRoom] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -221,13 +222,14 @@ const Students = ({ allotments, isMobile }) => {
 
   const handleClearFilters = () => {
     setSearchTerm('');
+    setSearchInput('');
     setSelectedHostel('');
     setSelectedRoom('');
   };
 
   return (
     <div className="p-3 flex-1 flex flex-col overflow-hidden">
-      <div className="p-3 md:p-6 space-y-4 md:space-y-6 overflow-auto pb-20 md:pb-6">
+      <div className="hidden md:block p-3 md:p-6 space-y-4 md:space-y-6 overflow-auto pb-20 md:pb-6">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Student Allotments</h1>
         <p className="text-sm text-slate-500 mt-1">View and manage student hostel allotments</p>
       </div>
@@ -281,15 +283,21 @@ const Students = ({ allotments, isMobile }) => {
               <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
                 Search
               </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <Input
-                  type="text"
-                  placeholder="Name or Roll No..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
+              <div className="relative flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <Input
+                    type="text"
+                    placeholder="Name or Roll No..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') setSearchTerm(searchInput); }}
+                    className="pl-9"
+                  />
+                </div>
+                <Button size="sm" onClick={() => setSearchTerm(searchInput)}>
+                  Search
+                </Button>
               </div>
             </div>
 
