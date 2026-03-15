@@ -16,151 +16,81 @@ const StudentModal = ({ student, onClose }) => {
   const profileImageUrl = profileImageBasePath ? `${profileImageBasePath}.png` : null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
-      <Card className="max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3">
+      <div className="bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-sm">
         {/* Header */}
-        <div className="flex items-center justify-between p-3 sm:p-6 border-b border-slate-200 dark:border-slate-800">
-          <div className="flex-1 min-w-0 pr-2">
-            <h2 className="text-lg sm:text-2xl font-semibold text-slate-900 dark:text-white truncate">Student Details</h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              {student['Roll No.']}
-            </p>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Student Details</h2>
+            <p className="text-xs text-slate-500">{student['Roll No.']}</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="flex-shrink-0">
-            <X size={20} />
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+            <X size={16} />
           </Button>
         </div>
 
-        <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-80px)] sm:max-h-[calc(90vh-100px)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
-            {/* Profile Image */}
-            <div className="space-y-2 sm:space-y-4">
-              {profileImageUrl && (
-                <div className="aspect-square bg-slate-100 dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800">
-                  <img
-                    src={profileImageUrl}
-                    alt="Student profile"
-                    className="w-full h-full object-cover"
-                    onError={(e) => handleImageErrorSimple(e, profileImageBasePath)}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Student Info */}
-            <div className="space-y-2 sm:space-y-4">
-              <Card className="bg-cyan-50 dark:bg-cyan-950 border-cyan-200 dark:border-cyan-900">
-                <CardContent className="p-3 sm:p-6">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-cyan-600 rounded-full flex items-center justify-center text-white flex-shrink-0">
-                      <User size={20} className="sm:w-6 sm:h-6" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm text-cyan-700 dark:text-cyan-400">Student Name</p>
-                      <p className="text-base sm:text-xl font-semibold text-cyan-900 dark:text-cyan-100 truncate">
-                        {student.Name}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="pt-3 sm:pt-4 border-t border-cyan-200 dark:border-cyan-900">
-                    <p className="text-xs sm:text-sm text-cyan-700 dark:text-cyan-400">Roll Number</p>
-                    <p className="text-sm sm:text-lg font-medium text-cyan-900 dark:text-cyan-100 break-all">{student['Roll No.']}</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <Card>
-                  <CardContent className="p-2 sm:p-4">
-                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                      <Home size={14} className="text-cyan-600 flex-shrink-0" />
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Hostel</p>
-                    </div>
-                    <p className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white truncate">
-                      {student.Hostel || 'N/A'}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-2 sm:p-4">
-                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                      <MapPin size={14} className="text-cyan-600 flex-shrink-0" />
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Room</p>
-                    </div>
-                    <p className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white truncate">
-                      {student.Room || 'N/A'}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-2 sm:p-4">
-                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                      <Phone size={14} className="text-cyan-600 flex-shrink-0" />
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Contact</p>
-                    </div>
-                    <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white truncate">
-                      {student.Contact || 'N/A'}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-2 sm:p-4">
-                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                      <Calendar size={14} className="text-cyan-600 flex-shrink-0" />
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Batch</p>
-                    </div>
-                    <p className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white truncate">
-                      {student.Batch || 'N/A'}
-                    </p>
-                  </CardContent>
-                </Card>
+        <div className="p-4 space-y-3">
+          {/* Identity row */}
+          <div className="flex items-center gap-3">
+            {profileImageUrl ? (
+              <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-800 flex-shrink-0">
+                <img
+                  src={profileImageUrl}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  onError={(e) => handleImageErrorSimple(e, profileImageBasePath)}
+                />
               </div>
-
-              <Card>
-                <CardContent className="p-2 sm:p-4">
-                  <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                    <CreditCard size={14} className="text-cyan-600 flex-shrink-0" />
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Mess Status</p>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white">
-                      {student['Mess Status'] || 'N/A'}
-                    </p>
-                    <Badge variant={student['Mess Status'] === 'ON' ? 'success' : 'secondary'} className="text-xs">
-                      {student['Mess Status'] === 'ON' ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {student.Arrears && student.Arrears !== '-' && (
-                <Card className="border-red-200 dark:border-red-900">
-                  <CardContent className="p-2 sm:p-4 bg-red-50 dark:bg-red-950">
-                    <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-1">Arrears</p>
-                    <p className="text-sm sm:text-lg font-semibold text-red-700 dark:text-red-300">
-                      {student.Arrears}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {student.TotalCollection && (
-                <Card>
-                  <CardContent className="p-2 sm:p-4">
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total Collection</p>
-                    <p className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white">
-                      {student.TotalCollection}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center text-cyan-600 flex-shrink-0">
+                <User size={22} />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm text-slate-900 dark:text-white truncate">{student.Name}</p>
+              <p className="text-xs text-slate-500 truncate">{student['Roll No.']}</p>
             </div>
           </div>
+
+          {/* Details grid */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-2">
+              <p className="text-slate-400 mb-0.5 flex items-center gap-1"><Home size={10} /> Hostel</p>
+              <p className="font-medium text-slate-900 dark:text-white truncate">{student.Hostel || 'N/A'}</p>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-2">
+              <p className="text-slate-400 mb-0.5 flex items-center gap-1"><MapPin size={10} /> Room</p>
+              <p className="font-medium text-slate-900 dark:text-white truncate">{student.Room || 'N/A'}</p>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-2">
+              <p className="text-slate-400 mb-0.5 flex items-center gap-1"><Phone size={10} /> Contact</p>
+              <p className="font-medium text-slate-900 dark:text-white truncate">{student.Contact || 'N/A'}</p>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-2">
+              <p className="text-slate-400 mb-0.5 flex items-center gap-1"><Calendar size={10} /> Batch</p>
+              <p className="font-medium text-slate-900 dark:text-white truncate">{student.Batch || 'N/A'}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-2">
+              <p className="text-slate-400 mb-0.5 flex items-center gap-1"><CreditCard size={10} /> Mess</p>
+              <p className="font-medium text-slate-900 dark:text-white">{student['Mess Status'] || 'N/A'}</p>
+            </div>
+            {student.Arrears && student.Arrears !== '-' ? (
+              <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg p-2">
+                <p className="text-red-400 mb-0.5">Arrears</p>
+                <p className="font-medium text-red-700 dark:text-red-300">{student.Arrears}</p>
+              </div>
+            ) : (
+              <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-2">
+                <p className="text-slate-400 mb-0.5">Arrears</p>
+                <p className="font-medium text-slate-900 dark:text-white">None</p>
+              </div>
+            )}
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };
@@ -229,7 +159,7 @@ const Students = ({ allotments, isMobile }) => {
 
   return (
     <div className="p-3 flex-1 flex flex-col overflow-hidden">
-      <div className="hidden md:block p-3 md:p-6 space-y-4 md:space-y-6 overflow-auto pb-20 md:pb-6">
+      <div className="hidden md:block px-3 md:px-6 pt-4 md:pt-6 pb-2">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Student Allotments</h1>
         <p className="text-sm text-slate-500 mt-1">View and manage student hostel allotments</p>
       </div>
@@ -325,53 +255,42 @@ const Students = ({ allotments, isMobile }) => {
 
       {/* Students Grid */}
       <div className="flex-1 mt-3 overflow-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
           {filteredStudents.map((student, index) => (
             <Card 
               key={index} 
               className="hover:shadow-md transition-shadow cursor-pointer"
               onClick={() => setSelectedStudent(student)}
             >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center text-cyan-600 dark:text-cyan-400 flex-shrink-0">
-                    <User size={24} />
+              <CardContent className="p-3">
+                {/* Top row: avatar + name + roll */}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center text-cyan-600 dark:text-cyan-400 flex-shrink-0">
+                    <User size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-900 dark:text-white truncate">
+                    <h3 className="font-semibold text-sm text-slate-900 dark:text-white truncate">
                       {student.Name}
                     </h3>
-                    <p className="text-sm text-slate-500 truncate">{student['Roll No.']}</p>
-                    
-                    <div className="mt-3 space-y-2">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Home size={14} className="text-cyan-600 flex-shrink-0" />
-                        <span className="text-slate-600 dark:text-slate-400 truncate">
-                          {student.Hostel} - Room {student.Room}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone size={14} className="text-cyan-600 flex-shrink-0" />
-                        <span className="text-slate-600 dark:text-slate-400 truncate">
-                          {student.Contact || 'N/A'}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 flex-wrap mt-2">
-                        <Badge variant={student['Mess Status'] === 'ON' ? 'success' : 'secondary'}>
-                          Mess: {student['Mess Status']}
-                        </Badge>
-                        <Badge variant="outline">
-                          Batch: {student.Batch}
-                        </Badge>
-                        {student.Arrears && student.Arrears !== '-' && (
-                          <Badge variant="destructive">
-                            Arrears: {student.Arrears}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
+                    <p className="text-xs text-slate-500 truncate">{student['Roll No.']}</p>
+                  </div>
+                  {student.Arrears && student.Arrears !== '-' && (
+                    <Badge variant="destructive" className="text-xs py-0 shrink-0">Arrears</Badge>
+                  )}
+                </div>
+                {/* Bottom row: two-column detail grid */}
+                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-2">
+                  <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 truncate">
+                    <Home size={11} className="text-cyan-600 flex-shrink-0" />
+                    <span className="truncate">{student.Hostel || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 truncate">
+                    <MapPin size={11} className="text-cyan-600 flex-shrink-0" />
+                    <span className="truncate">Room {student.Room || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 truncate col-span-2">
+                    <Phone size={11} className="text-cyan-600 flex-shrink-0" />
+                    <span className="truncate">{student.Contact || 'N/A'}</span>
                   </div>
                 </div>
               </CardContent>

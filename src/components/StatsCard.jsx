@@ -22,23 +22,23 @@ const StatsCard = ({ label, value, icon: Icon, description, variant = 'default' 
 
   return (
     <Card className={cn(variants[variant])}>
-      <CardContent className="p-4 md:p-6  ">
+      <CardContent className="p-3 md:p-6">
         <div className="flex items-center justify-between">
           <div className="flex-1">
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400">
               {label}
             </p>
-            <p className="text-3xl font-bold text-slate-900 dark:text-white mt-2">
+            <p className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mt-1 md:mt-2">
               {value}
             </p>
             {description && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 md:mt-1">
                 {description}
               </p>
             )}
           </div>
-          <div className={cn("ml-4 p-3 rounded-lg", iconBgColors[variant])}>
-            <Icon className={cn("w-6 h-6", iconColors[variant])} />
+          <div className={cn("ml-2 md:ml-4 p-2 md:p-3 rounded-lg", iconBgColors[variant])}>
+            <Icon className={cn("w-4 h-4 md:w-6 md:h-6", iconColors[variant])} />
           </div>
         </div>
       </CardContent>

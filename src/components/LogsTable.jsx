@@ -26,7 +26,7 @@ const LogsTable = ({ logs, allotments, onRowClick, sortConfig, onSort }) => {
         <div className="grid grid-cols-12 gap-4 px-6 py-3">
           <div 
             onClick={() => onSort('identity')}
-            className="col-span-3 flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-700 dark:hover:text-slate-300"
+            className="col-span-4 flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-700 dark:hover:text-slate-300"
           >
             Student Identity
             {getSortIcon('identity')}
@@ -52,8 +52,8 @@ const LogsTable = ({ logs, allotments, onRowClick, sortConfig, onSort }) => {
             Status
             {getSortIcon('status')}
           </div>
-          <div className="col-span-2 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Mess Status
+          <div className="col-span-1 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Arrears
           </div>
         </div>
       </div>
@@ -69,18 +69,18 @@ const LogsTable = ({ logs, allotments, onRowClick, sortConfig, onSort }) => {
             <div 
               key={i}
               onClick={() => onRowClick(log)}
-              className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors cursor-pointer"
+              className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors cursor-pointer"
             >
               {/* Student Identity */}
-              <div className="col-span-3 flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center text-cyan-600 dark:text-cyan-400 flex-shrink-0">
-                  <UserCircle size={20} />
+              <div className="col-span-4 flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center text-cyan-600 dark:text-cyan-400 flex-shrink-0">
+                  <UserCircle size={18} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-slate-900 dark:text-white truncate">
+                  <p className="font-medium text-sm text-slate-900 dark:text-white truncate">
                     {student?.Name || 'Unregistered'}
                   </p>
-                  <p className="text-sm text-slate-500 truncate">{log['QR Code']}</p>
+                  <p className="text-xs text-slate-500 truncate">{log['QR Code']}</p>
                 </div>
               </div>
 
@@ -89,11 +89,11 @@ const LogsTable = ({ logs, allotments, onRowClick, sortConfig, onSort }) => {
                 <span className="text-sm font-medium text-slate-900 dark:text-white">
                   {moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss', true).format('hh:mm A')}
                 </span>
-                <span className="text-sm text-slate-500">
+                <span className="text-xs text-slate-500">
                   {moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss', true).format('DD MMM YYYY')}
                 </span>
                 {isLate && (
-                  <Badge variant="destructive" className="mt-1 w-fit">Late Entry</Badge>
+                  <Badge variant="destructive" className="mt-1 w-fit text-xs py-0">Late</Badge>
                 )}
               </div>
 
@@ -102,7 +102,7 @@ const LogsTable = ({ logs, allotments, onRowClick, sortConfig, onSort }) => {
                 <span className="text-sm font-medium text-slate-900 dark:text-white truncate">
                   {student?.Hostel || 'N/A'}
                 </span>
-                <span className="text-sm text-slate-500 truncate">
+                <span className="text-xs text-slate-500 truncate">
                   Room: {student?.Room || '??'}
                 </span>
               </div>
@@ -114,11 +114,15 @@ const LogsTable = ({ logs, allotments, onRowClick, sortConfig, onSort }) => {
                 </Badge>
               </div>
 
-              {/* Mess Status */}
-              <div className="col-span-2 flex items-center">
-                <Badge variant={student?.['Mess Status'] === 'ON' ? 'success' : 'secondary'}>
-                  {student?.['Mess Status'] || 'N/A'}
-                </Badge>
+              {/* Arrears */}
+              <div className="col-span-1 flex items-center">
+                {student?.Arrears && student.Arrears !== '-' ? (
+                  <span className="text-xs font-medium text-red-600 dark:text-red-400 truncate">
+                    {student.Arrears}
+                  </span>
+                ) : (
+                  <span className="text-xs text-slate-400">—</span>
+                )}
               </div>
             </div>
           );

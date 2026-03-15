@@ -637,7 +637,7 @@ const App = () => {
           )}
 
           {/* Analytics Widgets - 2 per row on mobile, 4 on desktop */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
             <StatsCard
               label="Boarders"
               value={stats.boarders}
