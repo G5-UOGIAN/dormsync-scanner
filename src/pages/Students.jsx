@@ -288,9 +288,9 @@ const Students = ({ allotments, isMobile }) => {
       {/* Students Grid */}
       <div className="flex-1 mt-3 overflow-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
-          {filteredStudents.map((student, index) => (
+          {filteredStudents.map((student) => (
             <Card 
-              key={index} 
+              key={student['Roll No.'] || student.Name}
               className="hover:shadow-md transition-shadow cursor-pointer"
               onClick={() => setSelectedStudent(student)}
             >

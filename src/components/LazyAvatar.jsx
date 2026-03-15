@@ -14,14 +14,18 @@ import { resolveImageUrl, getCachedImageUrl } from '../utils/imageLoader';
  */
 const LazyAvatar = ({ basePath, size = 'w-8 h-8', fallback, className = '' }) => {
   const ref = useRef(null);
-  const [src, setSrc] = useState(() => getCachedImageUrl(basePath)); // instant if cached
+  const [src, setSrc] = useState(() => getCachedImageUrl(basePath));
   const [entered, setEntered] = useState(() => !!getCachedImageUrl(basePath));
 
+  // Reset when basePath changes (e.g. list reorder after search)
   useEffect(() => {
-    if (!basePath) return;
+    const cached = getCachedImageUrl(basePath);
+    setSrc(cached);
+    setEntered(!!cached);
+  }, [basePath]);
 
-    // Already resolved — nothing to do
-    if (src) return;
+  useEffect(() => {
+    if (!basePath || src) return;
 
     const el = ref.current;
     if (!el) return;
@@ -34,7 +38,7 @@ const LazyAvatar = ({ basePath, size = 'w-8 h-8', fallback, className = '' }) =>
           resolveImageUrl(basePath).then(setSrc);
         }
       },
-      { rootMargin: '100px' } // start loading 100px before entering view
+      { rootMargin: '100px' }
     );
 
     observer.observe(el);
