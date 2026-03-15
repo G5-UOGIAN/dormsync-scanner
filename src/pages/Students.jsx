@@ -1,12 +1,36 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, MapPin, Phone, User, Home, X, Calendar, CreditCard } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent } from '../components/ui/card';
 import { Select, SelectItem } from '../components/ui/select';
-import { handleImageErrorSimple } from '../utils/imageLoader';
 import FullscreenImageViewer from '../components/FullscreenImageViewer';
+import LazyAvatar from '../components/LazyAvatar';
+import { resolveImageUrl, getCachedImageUrl } from '../utils/imageLoader';
+
+/** Eager avatar with click-to-fullscreen — used inside modals (already visible) */
+const ClickableAvatar = ({ basePath, onClick, size = 'w-12 h-12', fallback }) => {
+  const [src, setSrc] = useState(() => getCachedImageUrl(basePath));
+
+  useEffect(() => {
+    if (!basePath || src) return;
+    resolveImageUrl(basePath).then(setSrc);
+  }, [basePath, src]);
+
+  return (
+    <div
+      className={`${size} rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-800 flex-shrink-0 flex items-center justify-center text-cyan-600 cursor-pointer hover:ring-2 hover:ring-cyan-500 transition-all`}
+      onClick={onClick}
+    >
+      {src ? (
+        <img src={src} alt="Profile" className="w-full h-full object-cover" />
+      ) : (
+        fallback
+      )}
+    </div>
+  );
+};
 
 const StudentModal = ({ student, onClose }) => {
   if (!student) return null;
@@ -16,7 +40,6 @@ const StudentModal = ({ student, onClose }) => {
   const profileImagesPath = localStorage.getItem('profileImagesPath') || '/images/students/';
   const rollNo = student['Roll No.']?.trim();
   const profileImageBasePath = rollNo ? `${profileImagesPath}${rollNo}` : null;
-  const profileImageUrl = profileImageBasePath ? `${profileImageBasePath}.png` : null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3">
@@ -34,18 +57,13 @@ const StudentModal = ({ student, onClose }) => {
         <div className="p-4 space-y-3">
           {/* Identity row */}
           <div className="flex items-center gap-3">
-            {profileImageUrl ? (
-              <div
-                className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-800 flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-cyan-500 transition-all"
+            {profileImageBasePath ? (
+              <ClickableAvatar
+                basePath={profileImageBasePath}
                 onClick={() => setFullscreenBasePath(profileImageBasePath)}
-              >
-                <img
-                  src={profileImageUrl}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  onError={(e) => handleImageErrorSimple(e, profileImageBasePath)}
-                />
-              </div>
+                size="w-12 h-12"
+                fallback={<User size={22} />}
+              />
             ) : (
               <div className="w-12 h-12 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center text-cyan-600 flex-shrink-0">
                 <User size={22} />
@@ -282,20 +300,11 @@ const Students = ({ allotments, isMobile }) => {
                   {(() => {
                     const sRollNo = student['Roll No.']?.trim();
                     const sBasePath = sRollNo ? `${profileImagesPath}${sRollNo}` : null;
-                    const sImgUrl = sBasePath ? `${sBasePath}.png` : null;
                     return (
-                      <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-950 overflow-hidden flex items-center justify-center text-cyan-600 dark:text-cyan-400 flex-shrink-0">
-                        {sImgUrl ? (
-                          <img
-                            src={sImgUrl}
-                            alt="Profile"
-                            className="w-full h-full object-cover"
-                            onError={(e) => handleImageErrorSimple(e, sBasePath)}
-                          />
-                        ) : (
-                          <User size={18} />
-                        )}
-                      </div>
+                      <LazyAvatar
+                        basePath={sBasePath}
+                        fallback={<User size={18} />}
+                      />
                     );
                   })()}
                   <div className="flex-1 min-w-0">

@@ -1,111 +1,75 @@
 /**
- * Utility for loading images with multiple format fallbacks
+ * Image loader with multi-format fallback, module-level cache, and lazy loading support.
  * Supports: .png, .jpg, .jpeg, .PNG, .JPG, .JPEG, .webp, .WEBP, .heic, .HEIC
  */
 
-// Supported image formats in order of preference
-const IMAGE_FORMATS = [
-  'png',
-  'jpg',
-  'jpeg',
-  'PNG',
-  'JPG',
-  'JPEG',
-  'webp',
-  'WEBP',
-  'heic',
-  'HEIC'
+export const IMAGE_FORMATS = [
+  'png', 'jpg', 'jpeg',
+  'PNG', 'JPG', 'JPEG',
+  'webp', 'WEBP',
+  'heic', 'HEIC',
 ];
 
-/**
- * Get the fallback image URL (placeholder SVG)
- * @param {string} text - Text to display in placeholder
- * @returns {string} Data URL for placeholder SVG
- */
-export const getPlaceholderImage = (text = 'Image Not Available') => {
-  return `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="300"%3E%3Crect fill="%23f1f5f9" width="300" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif" font-size="14"%3E${encodeURIComponent(text)}%3C/text%3E%3C/svg%3E`;
-};
+/** Module-level cache: basePath → resolved URL (or placeholder) */
+const imageCache = new Map();
+
+/** In-flight promises: basePath → Promise<string> — prevents duplicate probing */
+const inflight = new Map();
+
+export const getPlaceholderImage = (text = 'Image Not Available') =>
+  `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="300"%3E%3Crect fill="%23f1f5f9" width="300" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif" font-size="14"%3E${encodeURIComponent(text)}%3C/text%3E%3C/svg%3E`;
 
 /**
- * Try to load an image with multiple format fallbacks
- * @param {string} basePath - Base path without extension (e.g., '/images/students/23021519-147')
- * @param {number} formatIndex - Current format index to try
- * @returns {Promise<string>} Resolves with working image URL or placeholder
+ * Probe formats sequentially and return the first URL that loads.
+ * Result is cached so subsequent calls for the same basePath are instant.
  */
-const tryLoadImage = (basePath, formatIndex = 0) => {
-  return new Promise((resolve) => {
-    if (formatIndex >= IMAGE_FORMATS.length) {
-      // All formats failed, return placeholder
-      resolve(getPlaceholderImage());
-      return;
-    }
+export const resolveImageUrl = (basePath) => {
+  if (!basePath) return Promise.resolve(getPlaceholderImage('No Image'));
 
-    const format = IMAGE_FORMATS[formatIndex];
-    const imageUrl = `${basePath}.${format}`;
-    
-    const img = new Image();
-    
-    img.onload = () => {
-      // Image loaded successfully
-      resolve(imageUrl);
+  // Cache hit
+  if (imageCache.has(basePath)) return Promise.resolve(imageCache.get(basePath));
+
+  // Dedupe in-flight
+  if (inflight.has(basePath)) return inflight.get(basePath);
+
+  const promise = new Promise((resolve) => {
+    const tryNext = (index) => {
+      if (index >= IMAGE_FORMATS.length) {
+        const placeholder = getPlaceholderImage('Not Found');
+        imageCache.set(basePath, placeholder);
+        resolve(placeholder);
+        return;
+      }
+      const url = `${basePath}.${IMAGE_FORMATS[index]}`;
+      const img = new Image();
+      img.onload = () => {
+        imageCache.set(basePath, url);
+        resolve(url);
+      };
+      img.onerror = () => tryNext(index + 1);
+      img.src = url;
     };
-    
-    img.onerror = () => {
-      // Try next format
-      tryLoadImage(basePath, formatIndex + 1).then(resolve);
-    };
-    
-    img.src = imageUrl;
-  });
+    tryNext(0);
+  }).finally(() => inflight.delete(basePath));
+
+  inflight.set(basePath, promise);
+  return promise;
 };
 
 /**
- * Get image URL with automatic format detection
- * @param {string} path - Base path to image folder
- * @param {string} filename - Filename without extension
- * @returns {Promise<string>} Promise that resolves with working image URL
+ * Synchronously return cached URL if available, otherwise null.
+ * Useful for rendering: if cached, render immediately; otherwise trigger resolveImageUrl.
  */
-export const getImageUrl = async (path, filename) => {
-  if (!filename) {
-    return getPlaceholderImage();
-  }
-  
-  const basePath = `${path}${filename}`;
-  return await tryLoadImage(basePath);
-};
+export const getCachedImageUrl = (basePath) =>
+  basePath ? (imageCache.get(basePath) ?? null) : null;
 
 /**
- * React hook-friendly image loader with fallback handling
- * Use this in onError handlers for <img> tags
- * @param {Event} e - Error event from img tag
- * @param {string} basePath - Base path without extension
- * @param {number} currentFormatIndex - Current format index (track in state)
- * @param {Function} setFormatIndex - State setter for format index
- */
-export const handleImageError = (e, basePath, currentFormatIndex, setFormatIndex) => {
-  const nextIndex = currentFormatIndex + 1;
-  
-  if (nextIndex >= IMAGE_FORMATS.length) {
-    // All formats failed, show placeholder
-    e.target.src = getPlaceholderImage();
-    return;
-  }
-  
-  // Try next format
-  setFormatIndex(nextIndex);
-  e.target.src = `${basePath}.${IMAGE_FORMATS[nextIndex]}`;
-};
-
-/**
- * Simple onError handler that tries all formats sequentially
- * Use this for simpler cases where you don't need state management
- * @param {Event} e - Error event from img tag
- * @param {string} basePath - Base path without extension
+ * onError handler — advances through formats and writes the winner to cache.
+ * Falls back to placeholder when all formats are exhausted.
  */
 export const handleImageErrorSimple = (e, basePath) => {
   const currentSrc = e.target.src;
-  
-  // Find current format index
+
   let currentIndex = -1;
   for (let i = 0; i < IMAGE_FORMATS.length; i++) {
     if (currentSrc.endsWith(`.${IMAGE_FORMATS[i]}`)) {
@@ -113,16 +77,39 @@ export const handleImageErrorSimple = (e, basePath) => {
       break;
     }
   }
-  
+
   const nextIndex = currentIndex + 1;
-  
+
   if (nextIndex >= IMAGE_FORMATS.length) {
-    // All formats failed, show placeholder
+    const placeholder = getPlaceholderImage();
+    imageCache.set(basePath, placeholder);
+    e.target.src = placeholder;
+    return;
+  }
+
+  const nextUrl = `${basePath}.${IMAGE_FORMATS[nextIndex]}`;
+  e.target.src = nextUrl;
+
+  // When this next attempt loads successfully, cache it
+  e.target.onload = () => {
+    imageCache.set(basePath, nextUrl);
+    e.target.onload = null;
+  };
+};
+
+// Legacy exports kept for compatibility
+export const getImageUrl = async (path, filename) => {
+  if (!filename) return getPlaceholderImage();
+  return resolveImageUrl(`${path}${filename}`);
+};
+
+export const handleImageError = (e, basePath, currentFormatIndex, setFormatIndex) => {
+  const nextIndex = currentFormatIndex + 1;
+  if (nextIndex >= IMAGE_FORMATS.length) {
     e.target.src = getPlaceholderImage();
     return;
   }
-  
-  // Try next format
+  setFormatIndex(nextIndex);
   e.target.src = `${basePath}.${IMAGE_FORMATS[nextIndex]}`;
 };
 
@@ -131,5 +118,7 @@ export default {
   getPlaceholderImage,
   handleImageError,
   handleImageErrorSimple,
-  IMAGE_FORMATS
+  resolveImageUrl,
+  getCachedImageUrl,
+  IMAGE_FORMATS,
 };

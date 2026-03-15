@@ -2,7 +2,7 @@ import { UserCircle, Clock, Home } from 'lucide-react';
 import moment from 'moment';
 import { Badge } from './ui/badge';
 import { Card, CardContent } from './ui/card';
-import { handleImageErrorSimple } from '../utils/imageLoader';
+import LazyAvatar from './LazyAvatar';
 
 const LogsGrid = ({ logs, allotments, onCardClick }) => {
   const profileImagesPath = localStorage.getItem('profileImagesPath') || '/images/students/';
@@ -26,7 +26,6 @@ const LogsGrid = ({ logs, allotments, onCardClick }) => {
         const isLate = isLateEntry(log.DateTime, lateEntryHour);
         const rollNo = log['QR Code']?.trim();
         const profileImageBasePath = rollNo ? `${profileImagesPath}${rollNo}` : null;
-        const profileImageUrl = profileImageBasePath ? `${profileImageBasePath}.png` : null;
         
         return (
           <Card 
@@ -37,18 +36,10 @@ const LogsGrid = ({ logs, allotments, onCardClick }) => {
             <CardContent className="p-3">
               {/* Top row: avatar + name + badges */}
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-950 overflow-hidden flex items-center justify-center text-cyan-600 dark:text-cyan-400 flex-shrink-0">
-                  {profileImageUrl ? (
-                    <img
-                      src={profileImageUrl}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                      onError={(e) => handleImageErrorSimple(e, profileImageBasePath)}
-                    />
-                  ) : (
-                    <UserCircle size={18} />
-                  )}
-                </div>
+                <LazyAvatar
+                  basePath={profileImageBasePath}
+                  fallback={<UserCircle size={18} />}
+                />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <h3 className="font-semibold text-sm text-slate-900 dark:text-white truncate">

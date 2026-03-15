@@ -1,26 +1,7 @@
 import { X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { getPlaceholderImage } from '../utils/imageLoader';
-
-const IMAGE_FORMATS = ['png', 'jpg', 'jpeg', 'PNG', 'JPG', 'JPEG', 'webp', 'WEBP', 'heic', 'HEIC'];
-
-const resolveImageUrl = (basePath) => {
-  return new Promise((resolve) => {
-    const tryNext = (index) => {
-      if (index >= IMAGE_FORMATS.length) {
-        resolve(getPlaceholderImage('Image Not Found'));
-        return;
-      }
-      const url = `${basePath}.${IMAGE_FORMATS[index]}`;
-      const img = new Image();
-      img.onload = () => resolve(url);
-      img.onerror = () => tryNext(index + 1);
-      img.src = url;
-    };
-    tryNext(0);
-  });
-};
+import { resolveImageUrl } from '../utils/imageLoader';
 
 const FullscreenImageViewer = ({ basePath, alt, onClose }) => {
   const [resolvedSrc, setResolvedSrc] = useState(null);

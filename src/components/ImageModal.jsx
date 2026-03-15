@@ -1,9 +1,9 @@
 import { X, MapPin, Phone, Clock } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import moment from 'moment';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { handleImageErrorSimple, getPlaceholderImage } from '../utils/imageLoader';
+import { resolveImageUrl, getCachedImageUrl, getPlaceholderImage } from '../utils/imageLoader';
 import FullscreenImageViewer from './FullscreenImageViewer';
 
 const ImageModal = ({ log, student, onClose }) => {
@@ -17,7 +17,6 @@ const ImageModal = ({ log, student, onClose }) => {
 
   const rollNo = log['QR Code']?.trim();
   const profileImageBasePath = rollNo ? `${profileImagesPath}${rollNo}` : null;
-  const profileImageUrl = profileImageBasePath ? `${profileImageBasePath}.png` : null;
 
   const lateEntryHour = parseInt(localStorage.getItem('lateEntryHour') || '22');
   const entryHour = moment(log.DateTime, 'DD/MM/YYYY HH:mm:ss').hour();
@@ -30,6 +29,12 @@ const ImageModal = ({ log, student, onClose }) => {
   };
 
   const [fullscreenBasePath, setFullscreenBasePath] = useState(null);
+  const [profileSrc, setProfileSrc] = useState(() => getCachedImageUrl(profileImageBasePath));
+
+  useEffect(() => {
+    if (!profileImageBasePath || profileSrc) return;
+    resolveImageUrl(profileImageBasePath).then(setProfileSrc);
+  }, [profileImageBasePath, profileSrc]);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3">
@@ -60,17 +65,16 @@ const ImageModal = ({ log, student, onClose }) => {
 
           {/* Student identity row */}
           <div className="flex items-center gap-3">
-            {profileImageUrl && (
+            {profileImageBasePath && (
               <div
-                className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-800 flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-cyan-500 transition-all"
+                className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-900 overflow-hidden border border-slate-200 dark:border-slate-800 flex-shrink-0 flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-cyan-500 transition-all"
                 onClick={() => setFullscreenBasePath(profileImageBasePath)}
               >
-                <img
-                  src={profileImageUrl}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  onError={(e) => handleImageErrorSimple(e, profileImageBasePath)}
-                />
+                {profileSrc ? (
+                  <img src={profileSrc} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-cyan-100 dark:bg-cyan-950" />
+                )}
               </div>
             )}
             <div className="flex-1 min-w-0">

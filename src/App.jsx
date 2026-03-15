@@ -105,7 +105,7 @@ const App = () => {
       
       // Get GitHub token from environment
       const githubToken = import.meta.env.VITE_GITHUB_PAT;
-      console.log(githubToken);
+      // console.log(githubToken);
       
       // Convert raw.githubusercontent.com URLs to API URLs if token is present
       if (githubToken && scanLogsUrl.includes('raw.githubusercontent.com')) {
@@ -129,7 +129,7 @@ const App = () => {
         headers['Authorization'] = `token ${githubToken}`;
         headers['Accept'] = 'application/vnd.github.v3.raw'; // Get raw content directly
       }
-      console.log(headers);
+      // console.log(headers);
       
       // Fetch both files
       const [logsResponse, allotmentsResponse] = await Promise.all([
