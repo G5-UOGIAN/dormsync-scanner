@@ -1,251 +1,118 @@
 import { useState, useEffect } from 'react';
-import { Save, FolderOpen } from 'lucide-react';
+import { Save, FolderOpen, RotateCcw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { toast } from '../components/ui/toast';
 import PageHeader from '../components/PageHeader';
 
+const DEFAULT_SCAN_LOGS = 'https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_log.csv';
+const DEFAULT_LATE_HOUR = '22';
+
 const Settings = ({ isMobile }) => {
   const [scanLogsPath, setScanLogsPath] = useState('');
-  const [allotmentsPath, setAllotmentsPath] = useState('');
-  const [lateEntryHour, setLateEntryHour] = useState('22');
-  const [profileImagesPath, setProfileImagesPath] = useState('');
-  const [scanImagesPath, setScanImagesPath] = useState('');
+  const [lateEntryHour, setLateEntryHour] = useState(DEFAULT_LATE_HOUR);
 
   useEffect(() => {
-    // Load saved paths from localStorage
-    const savedScanLogsPath = localStorage.getItem('scanLogsPath') || 'https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_log.csv';
-    const savedAllotmentsPath = localStorage.getItem('allotmentsPath') || 'https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/allotments.csv';
-
-    const savedLateEntryHour = localStorage.getItem('lateEntryHour') || '22';
-    const savedProfileImagesPath = localStorage.getItem('profileImagesPath') || '/images/students/';
-    const savedScanImagesPath = localStorage.getItem('scanImagesPath') || '/captured/';
-
-    setScanLogsPath(savedScanLogsPath);
-    setAllotmentsPath(savedAllotmentsPath);
-    setLateEntryHour(savedLateEntryHour);
-    setProfileImagesPath(savedProfileImagesPath);
-    setScanImagesPath(savedScanImagesPath);
+    setScanLogsPath(localStorage.getItem('scanLogsPath') || DEFAULT_SCAN_LOGS);
+    setLateEntryHour(localStorage.getItem('lateEntryHour') || DEFAULT_LATE_HOUR);
   }, []);
 
   const handleSave = () => {
-    // Save paths to localStorage
     localStorage.setItem('scanLogsPath', scanLogsPath);
-    localStorage.setItem('allotmentsPath', allotmentsPath);
     localStorage.setItem('lateEntryHour', lateEntryHour);
-    localStorage.setItem('profileImagesPath', profileImagesPath);
-    localStorage.setItem('scanImagesPath', scanImagesPath);
-
-    toast.success('Settings saved successfully! Please refresh the page to apply changes.');
+    toast.success('Settings saved. Refresh the page to apply changes.');
   };
 
   const handleReset = () => {
-    setScanLogsPath('https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_log.csv');
-    setAllotmentsPath('https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/allotments.csv');
-    setLateEntryHour('22');
-    setProfileImagesPath('/images/students/');
-    setScanImagesPath('/captured/');
-    toast.info('Settings reset to default values');
+    setScanLogsPath(DEFAULT_SCAN_LOGS);
+    setLateEntryHour(DEFAULT_LATE_HOUR);
+    toast.info('Reset to default values');
   };
+
+  const hour = parseInt(lateEntryHour) || 22;
+  const hourDisplay = hour === 0 ? '12:00 AM' : hour < 12 ? `${hour}:00 AM` : hour === 12 ? '12:00 PM' : `${hour - 12}:00 PM`;
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <PageHeader
-        title="Settings"
-        description="Configure application settings"
-      />
+      <PageHeader title="Settings" description="Configure application settings" />
 
-      <div className="flex-1 overflow-auto p-3 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
+      <div className="flex-1 overflow-auto p-3 md:p-6 space-y-4 pb-20 md:pb-6">
         <Card>
           <CardHeader>
-            <CardTitle>Data Source Configuration</CardTitle>
+            <CardTitle>Data Source</CardTitle>
             <CardDescription>
-              Configure the file paths for scan logs and student allotments.
-              By default, data is fetched from GitHub repository. You can change to local paths or other remote URLs.
+              URL for the scan logs CSV file fetched from GitHub.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Scan Logs Path */}
+          <CardContent className="space-y-5">
+            {/* Scan Logs URL */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Scan Logs File Path
+                Scan Logs URL
               </label>
-              <div className="flex gap-2">
-                <div className="flex-1 relative">
-                  <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <Input
-                    type="text"
-                    value={scanLogsPath}
-                    onChange={(e) => setScanLogsPath(e.target.value)}
-                    placeholder="https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_log.csv"
-                    className="pl-10"
-                  />
-                </div>
+              <div className="relative">
+                <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input
+                  type="text"
+                  value={scanLogsPath}
+                  onChange={(e) => setScanLogsPath(e.target.value)}
+                  placeholder={DEFAULT_SCAN_LOGS}
+                  className="pl-9"
+                />
               </div>
               <p className="text-xs text-slate-500">
-                Default: GitHub URL - https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/scan_log.csv
+                Raw GitHub URL to <code>scan_log.csv</code>. The allotments file is resolved automatically from the same path.
               </p>
             </div>
 
-            {/* Allotments Path */}
+            {/* Late Entry Hour */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Allotments File Path
+                Late Entry Threshold
               </label>
-              <div className="flex gap-2">
-                <div className="flex-1 relative">
-                  <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <Input
-                    type="text"
-                    value={allotmentsPath}
-                    onChange={(e) => setAllotmentsPath(e.target.value)}
-                    placeholder="https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/allotments.csv"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-slate-500">
-                Default: GitHub URL - https://raw.githubusercontent.com/G5-UOGIAN/scanner-logs/main/allotments.csv
-              </p>
-            </div>
-
-            {/* Late Entry Time */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Late Entry Time (Hour)
-              </label>
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-3">
                 <Input
                   type="number"
                   min="0"
                   max="23"
                   value={lateEntryHour}
                   onChange={(e) => setLateEntryHour(e.target.value)}
-                  placeholder="22"
-                  className="w-32"
+                  className="w-24"
                 />
-                <span className="text-sm text-slate-600 dark:text-slate-400">
-                  :00 (24-hour format)
-                </span>
+                <span className="text-sm text-slate-500">= {hourDisplay}</span>
               </div>
               <p className="text-xs text-slate-500">
-                Default: 22 (10:00 PM). Entries after this hour will be marked as "Late Entry"
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Image Paths Configuration */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Image Path Configuration</CardTitle>
-            <CardDescription>
-              Configure the folder paths for student profile images and scan capture images
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Profile Images Path */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Student Profile Images Folder
-              </label>
-              <div className="flex gap-2">
-                <div className="flex-1 relative">
-                  <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <Input
-                    type="text"
-                    value={profileImagesPath}
-                    onChange={(e) => setProfileImagesPath(e.target.value)}
-                    placeholder="/images/students/"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-slate-500">
-                Default: /images/students/ - Profile images should be named as {'{rollnumber}'}.png or .jpg
+                Entries at or after this hour (24h) are flagged as Late Entry.
               </p>
             </div>
 
-            {/* Scan Images Path */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Scan Capture Images Folder
-              </label>
-              <div className="flex gap-2">
-                <div className="flex-1 relative">
-                  <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <Input
-                    type="text"
-                    value={scanImagesPath}
-                    onChange={(e) => setScanImagesPath(e.target.value)}
-                    placeholder="/captured/"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-slate-500">
-                Default: /captured/ - Scan images are taken from the Image_Path column in CSV
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-3 pt-2">
               <Button onClick={handleSave} className="gap-2">
-                <Save size={16} />
-                Save Settings
+                <Save size={15} />
+                Save
               </Button>
-              <Button variant="outline" onClick={handleReset}>
-                Reset to Default
+              <Button variant="outline" onClick={handleReset} className="gap-2">
+                <RotateCcw size={15} />
+                Reset
               </Button>
             </div>
-
-            {/* Info Box */}
-            <div className="p-4 bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-900 rounded-lg">
-              <h4 className="text-sm font-semibold text-cyan-900 dark:text-cyan-100 mb-2">
-                Image Path Notes:
-              </h4>
-              <ul className="text-sm text-cyan-800 dark:text-cyan-200 space-y-1 list-disc list-inside">
-                <li>Profile images: Named as rollnumber.png or rollnumber.jpg (e.g., 23021519-147.png)</li>
-                <li>Scan images: Automatically extracted from Image_Path column in CSV</li>
-                <li>Paths can be local (e.g., /images/) or remote URLs</li>
-                <li>Ensure proper folder structure and file permissions</li>
-              </ul>
-            </div>
-
-            {/* GitHub Token Info */}
-            {/* <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
-              <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-2">
-                Private Repository Access:
-              </h4>
-              <p className="text-sm text-amber-800 dark:text-amber-200">
-                If accessing data from a private GitHub repository, ensure the <code className="px-1 py-0.5 bg-amber-100 dark:bg-amber-900 rounded">VITE_GITHUB_PAT</code> environment variable is set with a valid Personal Access Token. The token is automatically used for authentication when fetching from GitHub URLs.
-              </p>
-            </div> */}
           </CardContent>
         </Card>
 
-        {/* Current Configuration Display */}
+        {/* Current config summary */}
         <Card>
           <CardHeader>
             <CardTitle>Current Configuration</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Scan Logs:</span>
-              <code className="text-sm text-cyan-600 dark:text-cyan-400">{scanLogsPath}</code>
+          <CardContent className="space-y-2">
+            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg gap-4">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 shrink-0">Scan Logs</span>
+              <code className="text-xs text-cyan-600 dark:text-cyan-400 truncate text-right">{scanLogsPath}</code>
             </div>
             <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Late Entry Time:</span>
-              <code className="text-sm text-cyan-600 dark:text-cyan-400">{lateEntryHour}:00 ({lateEntryHour > 12 ? `${lateEntryHour - 12}:00 PM` : `${lateEntryHour}:00 AM`})</code>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Profile Images:</span>
-              <code className="text-sm text-cyan-600 dark:text-cyan-400">{profileImagesPath}</code>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Scan Images:</span>
-              <code className="text-sm text-cyan-600 dark:text-cyan-400">{scanImagesPath}</code>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Late Entry After</span>
+              <code className="text-sm text-cyan-600 dark:text-cyan-400">{lateEntryHour}:00 ({hourDisplay})</code>
             </div>
           </CardContent>
         </Card>

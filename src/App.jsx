@@ -15,7 +15,6 @@ import DateRangeModal from './components/DateRangeModal';
 import Login from './pages/Login';
 import Students from './pages/Students';
 import Reports from './pages/Reports';
-import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
 import { Tabs, TabsList, TabsTrigger } from './components/ui/tabs';
 import { toast } from './components/ui/toast';
@@ -494,7 +493,6 @@ const App = () => {
         )}>
           {activeTab === 'students' && <Students allotments={allotments} isMobile={isMobile} />}
           {activeTab === 'reports' && <Reports logs={logs} allotments={allotments} isMobile={isMobile} showUnique={showUnique} toggleUnique={toggleUnique} />}
-          {activeTab === 'notifications' && <Notifications isMobile={isMobile} />}
           {activeTab === 'settings' && <Settings isMobile={isMobile} onLogout={handleLogout} />}
         </div>
 
