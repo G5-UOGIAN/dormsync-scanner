@@ -307,7 +307,7 @@ const App = () => {
       return missingBoarders.map(student => ({
         DateTime: 'Not Scanned',
         'QR Code': student['Roll No.'],
-        Status: 'Missing',
+        Status: 'Absent',
         Name: student.Name,
         Hostel: student.Hostel,
         Room: student.Room
@@ -376,11 +376,13 @@ const App = () => {
       l.Status !== 'Boarder' && l.Status !== 'Non-Boarder'
     ).length;
 
-    // Calculate missing boarders
+    // Calculate absent boarders (allotment entries with no matching scan)
     const scannedBoarderRollNos = new Set(
       dataToAnalyze.filter(l => l.Status === 'Boarder').map(l => l['QR Code'])
     );
-    const missingBoarders = Object.keys(allotments).length - scannedBoarderRollNos.size;
+    const missingBoarders = Object.values(allotments).filter(
+      student => !scannedBoarderRollNos.has(student['Roll No.'])
+    ).length;
 
     // Calculate peak time
     const hourCounts = {};
@@ -651,7 +653,7 @@ const App = () => {
               variant="default"
             />
             <StatsCard
-              label="Missing Boarders"
+              label="Absent Boarders"
               value={stats.missingBoarders}
               icon={AlertTriangle}
               description="Haven't scanned"
@@ -721,7 +723,7 @@ const App = () => {
                         disabled={processing}
                         className="text-xs md:text-sm whitespace-nowrap"
                       >
-                        Missing
+                        Absent
                       </TabsTrigger>
                       <TabsTrigger 
                         value="invalid" 
