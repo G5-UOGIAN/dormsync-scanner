@@ -38,7 +38,8 @@ export const getAuthorizedUsers = () => {
       '23021519-058@uog.edu.pk',
       'mustafa@uog.edu.pk',
       'najeeb.rehman@uog.edu.pk',
-      'moeen.khalid@uog.edu.pk'
+      'moeen.khalid@uog.edu.pk',
+      '23011556-110@uog.edu.pk'
     ];
     localStorage.setItem('dormsyncscanner_authorized_users', JSON.stringify(defaultUsers));
     return defaultUsers;
